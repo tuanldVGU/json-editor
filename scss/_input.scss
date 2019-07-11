@@ -1,0 +1,203 @@
+.editor {
+  height: calc(100%);
+}
+.json-input {
+	height: calc(100% - 52px);
+	background-color: color(console_bg);
+	display: grid;
+	color: #fff;
+	grid-template-rows: 35px auto 27px;
+}
+.input-menu {
+	display: flex;
+	color : #fff;
+	width: 100%;
+	background-color: color(input_menu);
+	padding: 2px;
+	margin: 0;
+	box-sizing: border-box;
+	justify-content: space-between;
+	.tool{
+		display: flex;
+	}
+	.searchbox {
+		display: flex;
+		font-size: 0.8rem;
+		margin: 2px;
+		.icon:focus {
+			color: #dbdbdb;
+		}
+		input {
+			border: none;
+			box-shadow: none;
+			background: transparent;
+			height: 26px;
+			&:focus{
+				outline: none;
+				border-radius: 0%;
+				border-bottom: solid 1px #fff;
+			}
+		}
+	}
+}
+.input-status {
+	font-size: 10pt;
+	text-align: left;
+	color : #000;
+	width: 100%;
+	padding: 5px 10px;
+	background-color: color(console_navbar);
+}
+
+.input-outer {
+	margin-top: -35px;
+	padding-top: 35px;
+	margin-bottom: -27px;
+	padding-bottom: 27px;
+	display: grid;
+	grid-template-columns: 50px auto;
+}
+.input-content {
+	position: relative;
+	&:focus {
+		outline: none;
+	}
+}
+
+/*
+Input layer setup
+*/
+.input-layer{
+	z-index: 1;
+	position: absolute;
+	overflow: hidden;
+	word-wrap: normal;
+	white-space: pre;
+	box-sizing: border-box;
+	display: block;
+	top: 0; bottom: 0; left: 0; right: 0;
+}
+
+#input-textarea{
+	position: absolute;
+	z-index: 0;
+	width: 0.5em;
+	height: 1em;
+	opacity: 0;
+	background: transparent;
+	-moz-appearance: none;
+	appearance: none;
+	border: none;
+	resize: none;
+	outline: none;
+	overflow: hidden;
+	font: inherit;
+	padding: 0 1px;
+	margin: 0 -1px;
+	contain: strict;
+	-ms-user-select: text;
+	-moz-user-select: text;
+	-webkit-user-select: text;
+	user-select: text;
+	white-space: pre!important;
+}
+
+.input-linenumber{
+	height: calc(100%);
+	background-color: color(input_linenumber);
+	text-align: right;
+	// > .input-line{}
+}
+
+.input-text-layer {
+	contain: strict;
+	will-change: transform;
+	text-align: left;
+	// > .input-line{} 
+}
+
+.input-cursor-layer {
+	z-index: 4;
+	padding: 5px 10px;
+}
+
+.input-line {
+	width: calc(100%);
+	padding: 0 10px;
+	font-size: 10pt;
+	padding-top: 5px;
+	height: 24px;
+	overflow: hidden;
+	&:focus {
+		outline: none;
+	}
+}
+
+.line-number {
+	padding-left: 0;
+}
+.line-text {
+	background: color(console_bg);
+	color: #fff;
+}
+
+.numline-active {
+	background-color: color(input_linenumber_active);
+}
+
+.textline-active {
+	background-color: color(console_bg_active);
+}
+
+.inputfile {
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+label {
+	padding: 12px;
+}
+
+.inputfile+label {
+	display: inline-block;
+	cursor: pointer;
+}
+
+.inputfile:focus + label,
+.inputfile + label:hover {
+	background-color: color(dark_focus);
+}
+
+.inputfile + label * {
+	pointer-events: none;
+}
+
+.close-btn:hover {
+	color: color(console_warning);
+}
+
+// text highlight
+
+.text-prop {
+	color: color(value_string);
+}
+.text-val {
+	color: color(value_link);
+}
+
+.error-show {
+	padding-right: 15px;
+	margin: 0;
+	border: none;
+	background: transparent;
+	color: #fff;
+	display: inline-block;
+}
+
+.is-sm {
+	height: 12pt; width: 12pt;
+}

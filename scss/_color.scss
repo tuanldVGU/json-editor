@@ -1,0 +1,29 @@
+/**Console color 
+ *http://everyknightshoulddesign.blogspot.com/2013/08/beautiful-color-palettes-their-hex-codes.html 
+ *10. our little projects 
+ * #354458  #3A9AD9   #29ABA4   #E9E0D6   #EB7260
+*/
+
+/**Value color
+	*7. papa new guinea
+	* #5E412F   #FCEBB6   #78C0A8   #F07818   #F0A830
+*/ 
+$colors: (
+    dark_focus: #292929,
+    console_bg: #354458,
+    console_bg_active: #717c8a,
+    console_warning: #eb7260,
+    console_menu: #29aba4,
+    console_navbar: #e9e0d6,
+    value_string:#f07818,
+    value_link: #fcebb6,
+    value_boolean: #78c0a8,
+    input_menu: #29aba4,
+    input_linenumber: #78b5e5,
+    input_linenumber_active: #3a9ad9,
+    transparent_white: rgba(255, 255, 255, 0.15)
+);
+
+@function color($color-name){
+    @return map-get($colors,$color-name);
+}

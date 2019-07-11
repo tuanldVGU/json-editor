@@ -1,0 +1,26 @@
+.value-string { 
+  color: color(value_string);
+  &:focus{
+    outline: none;
+  }
+}
+
+.value-link{
+  color: color(value_link);
+  &:hover{
+      text-decoration: underline;
+  }
+}
+
+.value-color {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  margin: 0;
+  border: 1px solid #fff;
+  cursor: pointer;
+}
+
+.value-boolean {
+  color: color(value_boolean);
+}

@@ -1,0 +1,20 @@
+[
+{"class" : "Car",
+ "attributes" : [
+    {"name" : "Car_ref", "type" : "String"},
+    {"name" : "model", "type" : "String"},
+    {"name" : "color", "type" : "String"},
+    {"name" : "age", "type" : "Integer"}]
+},
+{"class" : "Person",
+ "attributes" : [
+    {"name" : "Person_ref", "type" : "String"},
+    {"name" : "name", "type" : "String"},
+    {"name" : "surname", "type" : "String"},
+    {"name" : "age", "type" : "Integer"}]
+ },
+{"association" : "Ownership",
+ "ends" : ["owners", "ownedCars"],
+ "classes" : ["Car", "Person"]
+}
+]
