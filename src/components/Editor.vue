@@ -3,8 +3,7 @@
 		<div class="columns is-gapless">
 			<div class="column is-two-thirds">
 				<menu-component 
-					:json_data='json' 
-					:default_json="defaultJSON"
+					:json_data='json'
 					@json_onChange="onChange($event)">
 				</menu-component>
 				<input-component 

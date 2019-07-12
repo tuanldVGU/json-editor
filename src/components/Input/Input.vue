@@ -46,11 +46,6 @@
 						:key="line.id" v-html="line"></pre>
 					</template>
 				</div>
-				<!-- <div class="input-layer input-marker-layer"></div> -->
-				<!-- <div class="input-layer input-cursor-layer" v-on:click="onClickEvent">
-					<div class="input-cursor blinking-cursor" v-bind:style="cursor_style">
-					</div>
-				</div> -->
 			</div>
 		</div>
 		<!-- status -->
@@ -63,7 +58,6 @@
 <script>
 import _ from 'lodash';
 import { eventBus } from '../../main';
-import { validate } from '../common_assets/util';
 
 var keyCtrl = require('./assets/KeyController.js')
 var util = require('../common_assets/util.js');
@@ -97,7 +91,7 @@ export default {
 	},
 	methods: {
 		initInput: function(){
-			this.textData = JSON.stringify(this.json_data,undefined,4)
+			this.textData = JSON.stringify(this.json_data,undefined,4);
 			this.lines = this.textData.split('\n');
 			this.highlight = this.highlightText(this.lines);
 		},
@@ -155,7 +149,7 @@ export default {
 				let start = result[i].split(":")[0];
 				let end = result[i].split(":")[1];
 				if ( (typeof end == 'string') && (trueReg.test(end) || falseReg.test(end)) ) {
-					end = util.str_splice(end,5,0,close);
+					end = (trueReg.test(end) ? util.str_splice(end,5,0,close) : util.str_splice(end,6,0,close));
 					end = util.str_splice(end,0,0,open_2);
 					result[i]= start + ':' + end;
 				}

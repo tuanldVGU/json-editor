@@ -79,6 +79,7 @@ var History = require('./assets/History.js')
 var TreePath = require('./assets/TreePath.js');
 
 var Node = require('../common_assets/Node.js');
+var Validator = require('../common_assets/Validator.js')
 var util = require('../common_assets/util.js');
 
 var error = '<i class="fas fa-exclamation-triangle"></i>';
@@ -89,15 +90,8 @@ export default {
 	data: function(){
 		return {
 			history: null,
-			// highlighter: new Highlighter(),
-			validateSchema: null,
 			errorNodes: [],
 			has_error: no_error,
-			focusTarget: null,
-			// autocomplete: new autocomplete(),
-			// history: new History(this),
-			_debouncedValidate: null,
-			searchBox: null,
 			treePath: {},
 			rootNode: {}
 		}
@@ -123,113 +117,15 @@ export default {
 		// :TODO
 		_setOptions: function(){
 			// compile a JSON schema validator if a JSON schema is provided
-			this.setSchema(this.options.schema, this.options.schemaRefs);
-			// this._debouncedValidate = util.debounce(this.validate.bind(this),this.debounce);
 			if (this.options) this.onSelectionChange(this.options.onSelectionChange);
 			if ( this.options.history ) this.history = new History(this);
-		},
-		// :TODO
-		setSchema: function(schema, schemaRefs){
-			if (schema){
-				// Another JSON Schema Validator
-				var ajv;
-				try{
-					ajv = AJV({ 
-						allerrors: true,
-						verbose: true,
-						schemaID:'auto',
-						$data: true
-					})
-					// support both draft-04 and draft-06 alongside the latest draft-07
-					ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'));
-					ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
-				}catch (err) {
-					console.warn('Failed to create an instance of Ajv, JSON Schema validation is not available. Please use a JSONEditor bundle including Ajv, or pass an instance of Ajv as via the configuration option `ajv`.');
-				}
-
-				if (ajv) {
-					if (schemaRefs){
-						for (var ref in schemaRefs) {
-							ajv.removeSchema(ref);  // When updating a schema - old refs has to be removed first
-							if(schemaRefs[ref]) {
-								ajv.addSchema(schemaRefs[ref], ref);
-							}
-						}
-						this.options.schemaRefs = schemaRefs
-					}
-					this.validatSchema = ajv.complile(schema);
-					this.option.schema = schema;
-
-					this.validate();
-				}
-				// update DOM
-				this.refresh();
-			} else {
-				// remove current schema
-				this.validateSchema = null;
-				this.options.schema = null;
-				this.options.schemaRefs = null;
-				// to clear current error messages
-				this.validate(); 
-				this.refresh();  
-			}
 		},
 		// :TODO
 		onSelectionChange: function(){
 		},
 		// :TODO
-		validate: function(){
-			var root = this.node;
-			if (!root) return;
-
-			var json = root.getValue();
-
-			// execute JSON schema validation
-			var schemaErrors = [];
-			if (this.validateSchema) {
-				var valid = this.validateSchema(json);
-				if (!valid) {
-						// apply all new errors
-					schemaErrors = this.validateSchema.errors
-						.map(function (error) {
-							return util.improveSchemaError(error);
-						})
-						.map(function findNode (error) {
-							return {
-								node: root.findNode(error.dataPath),
-								error: error
-							}
-						})
-						.filter(function hasNode (entry) {
-							return entry.node != null;
-						});
-				}
-				}
-
-				// execute custom validation and after than merge and render all errors
-				// try {
-				// 		this.validationSequence++;
-				// 		var me = this;
-				// 		var seq = this.validationSequence;
-				// 		this._validateCustom(json)
-				// 				.then(function (customValidationErrors) {
-				// 						// only apply when there was no other validation started whilst resolving async results
-				// 						if (seq === me.validationSequence) {
-				// 								var errorNodes = [].concat(schemaErrors, customValidationErrors || []);
-				// 								me._renderValidationErrors(errorNodes);
-				// 						}
-				// 				})
-				// 				.catch(function (err) {
-				// 						console.error(err);
-				// 				});
-				// }
-				// catch (err) {
-				// 		console.error(err);
-				// }
-		},
-		// :TODO
 		_validateCustom: function(){
-
+			Validator.formatValidator(this.node);
 		},
 		// :TODO
 		onclick: function() {
@@ -293,13 +189,14 @@ export default {
 				return obj.index == path
 			});
 
-			this.treePath.selectedPath = found.nav;
+			if (found) this.treePath.selectedPath = found.nav;
 		}
 	},
 	watch: {
 		node: function(val) {
 			// this.setData(val);
 			this._setRoot(val);
+			this._validateCustom();
 		},
 		errorNodes: function(val){
 			this.has_error= (val.length > 0 ? error : no_error);
@@ -310,8 +207,10 @@ export default {
 			this.setPath(val);
 		});
 		eventBus.$on('activeLine_Change', (val) =>{
-			this.treePath.selectedPath = this.treePath.path[val].nav;
-			this.updateExpand(true,this.treePath.path[val].index);
+			if (this.treePath.path[val]) {
+				this.treePath.selectedPath = this.treePath.path[val].nav;
+				this.updateExpand(true,this.treePath.path[val].index);
+			}
 		});
 		eventBus.$on('onChangeValue', (option) =>{
 			try {
@@ -325,6 +224,7 @@ export default {
 	mounted() {
 		this._setRoot(this.node);
 		this._setOptions();
+		this._validateCustom();
 	},
 }
 </script>
