@@ -66,7 +66,7 @@ export default {
 				// enableSort: true,
 				// enableTransform: true
 			},
-			defaultJSON: {
+			defaultJSON: [{
 				homepage: "https://www.google.com/",
 				thanks: 'you\'re welcome',
 				task: ["Input","OutLine","Menu"],
@@ -75,7 +75,7 @@ export default {
 					color: '#f07818',
 					isFinished: true,
 				}
-			}
+			}]
 		}
 	},
 	components: {

@@ -18,33 +18,35 @@
 				</div>
 		</div>
 		<!-- content -->
-		<div class="input-outer">
-			<div class="input-linenumber">
-				<template v-for="i in lines.length" >
-					<div v-bind:class="{
-						'input-line': true,
-						'line-number' : true, 
-						'numline-active': (i == activeLine + 1)
-						}" 
-						:key="i"><span class="icon is-sm error-show" v-bind:title="error.message" v-show="error.line && error.line == i"><i class="fas fa-times-circle"></i></span>{{i}}</div>
-				</template>
-			</div>
-			<div class="input-content" 
-					 contenteditable ="true" 
-					 @input="debouncedUpdateLine($event)"
-					 v-on:keydown="keydownHandler($event)"
-					 v-on:keyup="keyupHandler($event)"
-					 >
-				<div class="input-layer input-text-layer" ref="inputContent">
-					<template v-for="(line,i) in highlight" >
-						<pre v-bind:class="{
-						'input-line': true,
-						'line-text' : true
-						}"
-						@input="lineLimit($event)"
-						@click="onLineSelection(i+1)"
-						:key="line.id" v-html="line"></pre>
+		<div class="input-main">
+			<div class="input-outer">
+				<div class="input-linenumber">
+					<template v-for="i in lines.length" >
+						<div v-bind:class="{
+							'input-line': true,
+							'line-number' : true, 
+							'numline-active': (i == activeLine + 1)
+							}" 
+							:key="i"><span class="icon is-sm error-show" v-bind:title="error.message" v-show="error.line && error.line == i"><i class="fas fa-times-circle"></i></span>{{i}}</div>
 					</template>
+				</div>
+				<div class="input-content" 
+						contenteditable ="true" 
+						@input="debouncedUpdateLine($event)"
+						v-on:keydown="keydownHandler($event)"
+						v-on:keyup="keyupHandler($event)"
+						>
+					<div class="input-layer input-text-layer" ref="inputContent">
+						<template v-for="(line,i) in highlight" >
+							<pre v-bind:class="{
+							'input-line': true,
+							'line-text' : true
+							}"
+							@input="lineLimit($event)"
+							@click="onLineSelection(i+1)"
+							:key="line.id" v-html="line"></pre>
+						</template>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -181,7 +183,7 @@ export default {
 				case 13: //enter
 					e.preventDefault();
 					let res = keyCtrl.customonEnter();
-					if (res) {
+					if (res && res.level>0) {
 						this.activeLine ++;
 						this.lines.splice(res.index,0,res.content);
 						this.highlight = this.highlightText(this.lines);
