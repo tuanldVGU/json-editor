@@ -7,7 +7,7 @@
 			</div>
 			<div class="navbar-menu">
 				<div class="navbar-end">
-					<div class="navbar-item"><span class="icon" v-html="has_error"></span></div>
+					<a class="navbar-item" @click.prevent="showNoti('errorMes')"><span class="icon" v-html="has_error"></span></a>
 				</div>
 			</div>
 		</nav>
@@ -56,6 +56,15 @@
 					</template>
 			</div>
             <!-- <button @click="test()">SetMainPath</button> -->
+		</div>
+		<!-- Error notification -->
+		<div class="notification is-danger" id="errorMes">
+			<button class="delete" @click.prevent="hideNoti('errorMes')"></button>
+			<ul>
+				<li v-for="errorNode in errorNodes" :key="errorNode">
+					{{errorNode}}
+				</li>
+			</ul>
 		</div>
 		<!--Space for parent to add more html  -->
 		<!-- <slot name="no1"></slot> 
@@ -117,18 +126,16 @@ export default {
 		// :TODO
 		_setOptions: function(){
 			// compile a JSON schema validator if a JSON schema is provided
-			if (this.options) this.onSelectionChange(this.options.onSelectionChange);
-			if ( this.options.history ) this.history = new History(this);
-		},
-		// :TODO
-		onSelectionChange: function(){
+			// if ( this.options.history ) this.history = new History(this);
 		},
 		// :TODO
 		_validateCustom: function(){
-			Validator.formatValidator(this.node);
-		},
-		// :TODO
-		onclick: function() {
+			try {
+				Validator.formatValidator(this.rootNode);
+				this.errorNode = [];
+			} catch (err){
+				this.errorNodes = err;
+			}
 		},
 		// :TODO
 		updateExpand: function(option,val){
@@ -190,16 +197,33 @@ export default {
 			});
 
 			if (found) this.treePath.selectedPath = found.nav;
+		},
+		showNoti: function(req){
+			if (this.has_error == error){
+				let notification = document.getElementById(req);
+				notification.classList.remove('do-show');
+				void notification.offsetWidth;
+				notification.classList.add('do-show');
+			}
+		},
+		hideNoti: function(req){
+			let notification = document.getElementById(req);
+			notification.classList.remove('do-show');
 		}
 	},
 	watch: {
 		node: function(val) {
-			// this.setData(val);
-			this._setRoot(val);
-			this._validateCustom();
+			if (val != this.rootNode) {
+				this._setRoot(val);
+				this._validateCustom();
+			}
 		},
 		errorNodes: function(val){
+			console.log(val);
 			this.has_error= (val.length > 0 ? error : no_error);
+			if (val.length >0) {
+				this.showNoti('errorMes');
+			}
 		}
 	},
 	created(){

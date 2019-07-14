@@ -1,0 +1,51 @@
+$notification-position: (
+  'top right': (
+    top: 0,
+    right: 0
+  )
+);
+
+@keyframes fade-in {
+  from {
+    visibility: hidden;
+    opacity: 0;
+  }
+  to {
+    visibility: visible;
+    opacity: 1;
+  }
+}
+
+@keyframes slide-show {
+  to{
+    transform: translateY(0);
+  }
+}
+
+@mixin show_notification($duration: 1s, $persistance: 5s) {
+  position: fixed;
+  z-index: 1000;
+  bottom: 0;
+  right: 0;
+  $x: 'right';
+  #{$x}: 'right';
+  @at-root {
+    @keyframes slide-in-#{$x} {
+      to {
+        transform: translateX(0);
+      }
+    }
+  }       
+  &.do-show {
+    animation: 
+      slide-in-#{$x} $duration ease-in-out forwards, 
+      slide-in-#{$x} $duration ease-in-out reverse forwards $persistance;
+  }
+}
+
+.notification {
+  margin: 10px;
+  @include show_notification($duration: 1s, $persistance: 5s);
+  -webkit-transform: translateX(600px);
+  transform: translateX(600px);
+}
