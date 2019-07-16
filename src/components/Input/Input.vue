@@ -59,7 +59,7 @@
 
 <script>
 import _ from 'lodash';
-import { eventBus } from '../../main';
+import { eventBus } from '../../main.js';
 
 var keyCtrl = require('./assets/KeyController.js')
 var util = require('../common_assets/util.js');
