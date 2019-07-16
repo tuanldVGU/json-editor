@@ -39,13 +39,14 @@
                     </template>
                   </td>
                   <!-- field -->
-                  <td class="node-detail"> 
+                  <td class="node-detail" style="display: block; position: relative;"> 
                     <div v-bind:class="{
-                      'outline-readonly': isRoot(),
+                      'outline-readonly': isRoot() || !isNaN(node_field),
                       'node-value': true
                       }" 
-                      v-bind:contenteditable="!isRoot()" 
+                      v-bind:contenteditable="!isRoot() && isNaN(node_field)" 
                       v-on:keydown.enter.prevent="onChangeValue('field',$event)"
+                      @input="inputHandle($event)"
                     >{{node_field}}</div>
                   </td>
                   <!-- : -->
@@ -93,9 +94,11 @@
 </template>
 
 <script>
-import { eventBus } from '../../main.js'
+import { eventBus } from '../../main.js';
 
 var util = require('../common_assets/util.js');
+var AC = require('../common_assets/Autocomplete.js');
+var autocomplete_lib = ['class','association','super','ends','attributes','name','type'];
 
 var expand_btn = '<span class="icon"><i class="fas fa-angle-down"></i></span>';
 var collapse_btn = '<span class="icon"><i class="fas fa-angle-right"></i></span>';
@@ -173,6 +176,9 @@ export default {
         change: (typeof event == "boolean" || typeof event == "string") ? event : event.target.innerText
       };
       eventBus.$emit('onChangeValue',msg);
+    },
+    inputHandle: function(event){
+      AC.autocomplete(event.target,autocomplete_lib,this.node_index);
     }
   },
   watch: {

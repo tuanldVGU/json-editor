@@ -42,7 +42,7 @@ exports.findInvalidValue = function (node,location) {
   let me = this;
   if (node.type == "auto") {
     if (preserved_keywords.includes(node.value)) return (location + " : \"" + node.value + "\" " + error.format.invalid_keyValue);
-    return;
+    return [];
   } else {
     let error = [];
     node.childs.forEach(function (element){

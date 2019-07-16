@@ -219,9 +219,8 @@ export default {
 			}
 		},
 		errorNodes: function(val){
-			console.log(val);
 			this.has_error= (val.length > 0 ? error : no_error);
-			if (val.length >0) {
+			if (val.length > 0) {
 				this.showNoti('errorMes');
 			}
 		}
