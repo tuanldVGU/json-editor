@@ -27,7 +27,7 @@
 							'line-number' : true, 
 							'numline-active': (i == activeLine + 1)
 							}" 
-							:key="i"><span class="icon is-sm error-show" v-bind:title="error.message" v-show="error.line && error.line == i"><i class="fas fa-times-circle"></i></span>{{i}}</div>
+							:key="i"><span class="icon is-sm error-show" v-bind:title="error.msg" v-show="error.line && error.line == i"><i class="fas fa-times-circle"></i></span>{{i}}</div>
 					</template>
 				</div>
 				<div class="input-content" 
@@ -63,6 +63,7 @@ import { eventBus } from '../../main.js';
 
 var keyCtrl = require('./assets/KeyController.js')
 var util = require('../common_assets/util.js');
+var validate = require('../common_assets/Validator.js');
 
 var error = '<i class="fas fa-exclamation-triangle"></i>';
 
@@ -96,12 +97,6 @@ export default {
 			this.textData = JSON.stringify(this.json_data,undefined,4);
 			this.lines = this.textData.split('\n');
 			this.highlight = this.highlightText(this.lines);
-		},
-		focus: function(){
-
-		},
-		format: function(){
-
 		},
 		getText: function(){
 
@@ -159,6 +154,10 @@ export default {
 			return result;
 		},
 		debouncedUpdateLine: _.debounce( function(e) {
+			if (e.data == "[" || e.data == "{") {
+				let a = util.getCaretElement();
+				a.nodeValue += ((e.data == "{") ? "}": "]");
+			}
 			this.activeLine = util.setActiveLine();
 			this.textData = this.$refs.inputContent.innerText;			
 			this.lines = this.textData.split('\n');
@@ -171,9 +170,10 @@ export default {
 				}
 				this.error = {}
 			} catch (err) {
-				this.error = util.validateError(err.message);
+				this.error = validate.validateSyntaxError(err.message);
+				eventBus.$emit('jsonSyntax_error',this.error);
 			}
-		}, 1500),
+		}, 600),
 		keydownHandler: function(e){
 			switch (e.keyCode) {
 				case 9: // tab
@@ -211,11 +211,16 @@ export default {
 			this.initInput();
 		},
 		activeLine: function(val){
-			let msg = util.pathVal(this.lines,val);
-			eventBus.$emit('activeLine_Change',msg);
+			eventBus.$emit('activeLine_Change',val);
+		},
+		lines: function(val){
+			this.error = {}
 		}
 	},
 	created(){
+		eventBus.$on('ruleViolation',(val)=>{
+			this.error = val;
+		});
 	},
 	mounted() {
 		this.initInput();

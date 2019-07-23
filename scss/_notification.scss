@@ -48,4 +48,6 @@ $notification-position: (
   @include show_notification($duration: 1s, $persistance: 5s);
   -webkit-transform: translateX(600px);
   transform: translateX(600px);
+  max-width: 550px;
+  word-break: keep-all;
 }
