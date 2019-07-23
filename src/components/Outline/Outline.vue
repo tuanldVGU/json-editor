@@ -14,57 +14,47 @@
     <!-- Content -->
 		<div class="outline-content">
       <!-- Menu -->
-			<template v-if="options.menuBar">
-				<div class="outline-menu">
-					<!-- expand and collapse -->
-					<button class="outline-expandAll menu-btn" title="Expand all fields" @click="updateExpand(true,-1)">
-							<span class="icon"><i class="fas fa-expand"></i></span>
-					</button>
-					<button class="outline-collapseAll menu-btn" title="Collapse all fields" @click="updateExpand(false,-1)">
-						<span class="icon"><i class="fas fa-compress"></i></span>
+			<div class="outline-menu">
+				<!-- expand and collapse -->
+				<button class="outline-expandAll menu-btn" title="Expand all fields" @click="updateExpand(true,-1)">
+					<span class="icon"><i class="fas fa-expand"></i></span>
 				</button>
-					<!-- undo an redo -->
-					<template v-if="options.history">
-						<button class="outline-undo" title="Undo" @click="_onUndo()"></button>
-						<button class="outline-redo" title="Redo" @click="_onRedo()"></button>
-					</template>
-					<!-- search -->
-					<template v-if="options.search">
-					</template>
-				</div>  
-			</template>
+				<button class="outline-collapseAll menu-btn" title="Collapse all fields" @click="updateExpand(false,-1)">
+					<span class="icon"><i class="fas fa-compress"></i></span>
+				</button>
+				<!-- search -->
+				<template v-if="options.search">
+				</template>
+			</div>  
       <!-- Navigation -->
-			<template v-if="options.navigationBar">
-				<div class="outline-navigationbar" v-html="treePath.selectedPath">
-				</div>
-			</template>
+			<div class="outline-navigationbar" v-html="treePath.selectedPath">
+			</div>
       <!-- code outline -->
-			<div v-bind:class="{
-				'outline-content-outer': true,
-				'has-menu-bar': options.menuBar,
-				'has-nav-bar': options.navigationBar}">
-					<template v-if="!isEmpty(rootNode)">
-						<tree-component 
-							:childs='rootNode.childs'
-							:level= 0
-							:type="'root'"
-							:node_value='rootNode.value'
-							:showChild ='true'
-							:node_field="rootNode.field"
-							:node_index="'0'">
-						</tree-component>
-					</template>
+			<div class="input-main">
+				<div class="outline-content-outer">
+					<div v-bind:class="{
+						'has-menu-bar': options.menuBar,
+						'has-nav-bar': options.navigationBar}">
+							<template v-if="!isEmpty(rootNode)">
+								<tree-component 
+									:childs='rootNode.childs'
+									:level= 0
+									:type="'root'"
+									:node_value='rootNode.value'
+									:showChild ='true'
+									:node_field="rootNode.field"
+									:node_index="'0'">
+								</tree-component>
+							</template>
+					</div>
+				</div>
 			</div>
             <!-- <button @click="test()">SetMainPath</button> -->
 		</div>
 		<!-- Error notification -->
 		<div class="notification is-danger" id="errorMes">
 			<button class="delete" @click.prevent="hideNoti('errorMes')"></button>
-			<ul>
-				<li v-for="errorNode in errorNodes" :key="errorNode">
-					{{errorNode}}
-				</li>
-			</ul>
+			{{errorNodes.msg}}
 		</div>
 		<!--Space for parent to add more html  -->
 		<!-- <slot name="no1"></slot> 
@@ -99,7 +89,7 @@ export default {
 	data: function(){
 		return {
 			history: null,
-			errorNodes: [],
+			errorNodes: {msg:""},
 			has_error: no_error,
 			treePath: {},
 			rootNode: {}
@@ -120,41 +110,29 @@ export default {
 		}
 	},
 	methods: {
-		addError: function(){
-			this.errorNodes.push("new_line");
-		},
 		// :TODO
 		_setOptions: function(){
 			// compile a JSON schema validator if a JSON schema is provided
 			// if ( this.options.history ) this.history = new History(this);
 		},
-		// :TODO
 		_validateCustom: function(){
 			try {
 				Validator.formatValidator(this.rootNode);
-				this.errorNode = [];
+				this.errorNodes = {msg:""};
 			} catch (err){
 				this.errorNodes = err;
+				let pkg = {
+					line: this.treePath.getLine(err.index),
+					msg: err.msg
+				};
+				console.log(pkg);
+				eventBus.$emit('ruleViolation',pkg);
 			}
 		},
 		// :TODO
 		updateExpand: function(option,val){
 			var msg = {isExpanded: option, val: val};
 			eventBus.$emit('updateExpand',msg);
-		},
-		// :TODO
-		_onRedo: function(){
-			if (this.history){
-				this.history.undo();
-				this._onChange();
-			}
-		},
-		// :TODO
-		_onUndo: function(){
-			if (this.history){
-				this.history.undo();
-				this._onChange();
-			}
 		},
 		// :TODO
 		_onChange: function(){
@@ -215,12 +193,12 @@ export default {
 		node: function(val) {
 			if (val != this.rootNode) {
 				this._setRoot(val);
-				this._validateCustom();
 			}
+			this._validateCustom();
 		},
 		errorNodes: function(val){
-			this.has_error= (val.length > 0 ? error : no_error);
-			if (val.length > 0) {
+			this.has_error= (val.msg != "" ? error : no_error);
+			if (val.msg != "") {
 				this.showNoti('errorMes');
 			}
 		}
@@ -230,9 +208,9 @@ export default {
 			this.setPath(val);
 		});
 		eventBus.$on('activeLine_Change', (val) =>{
-			if (this.treePath.path[val]) {
-				this.treePath.selectedPath = this.treePath.path[val].nav;
-				this.updateExpand(true,this.treePath.path[val].index);
+			if (this.treePath.getPath(val)) {
+				this.treePath.selectedPath = this.treePath.getPath(val).nav;
+				this.updateExpand(true,this.treePath.getPath(val).index);
 			}
 		});
 		eventBus.$on('onChangeValue', (option) =>{
@@ -240,8 +218,11 @@ export default {
 				this.rootNode.setNodebyIndex(option.index,option.target,option.change);
 				this.$emit('json_onChange',this.rootNode.getValue());
 			} catch (err){
-				this.errorNodes.push(err);
+				this.errorNodes = err;
 			}
+		});
+		eventBus.$on('jsonSyntax_error', (val) =>{
+			this.errorNodes = {msg: val}
 		});
 	},
 	mounted() {

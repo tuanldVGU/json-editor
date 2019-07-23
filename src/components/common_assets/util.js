@@ -28,21 +28,6 @@ exports.validate = function (jsonString){
     }
 };
 
-/*
- Validate a string containing a JSON object
- This method uses JSONLint to validate the String. If JSONLint is not available, the built-in JSON parser of the browser is used.
-*/
-exports.validateError = function(str){
-  let err = {
-    line: -1,
-    message: ""
-  }
-  let data = str.split('\n');
-  err.line = parseInt(data[0].substring(20,data[0].length-1),10); 
-  err.message = data[3];
-  return err;
-};
-
 // Extend object a with the properties of object b
 exports.extend = function (a, b) {
     for (var prop in b) {
@@ -221,17 +206,6 @@ exports.setActiveLine = function() {
     i++;
   } 
   return i;
-};
-
-exports.pathVal = function(obj,index){
-  let pathVal = index;
-  let test_1 = /\s*\]\,$/ 
-  let test_2 = /\s*\}$/
-  for (let i =0; i <= index; i++){
-    if (test_1.test(obj[i])) pathVal--;
-    else if (test_2.test(obj[i])) pathVal--;
-  }
-  return pathVal;
 };
 
 exports.getRowIndex = function(node) {
