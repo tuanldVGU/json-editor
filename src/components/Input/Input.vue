@@ -60,6 +60,7 @@
 <script>
 import _ from 'lodash';
 import { eventBus } from '../../main.js';
+import { getCaretPosition } from '../common_assets/util';
 
 var keyCtrl = require('./assets/KeyController.js')
 var util = require('../common_assets/util.js');
@@ -75,8 +76,7 @@ export default {
 			textData: "",
 			lines: [],
 			highlight: [],
-			error: {},
-			save_position: {}
+			error: {}
 		}
 	},
 	props: {
@@ -99,7 +99,7 @@ export default {
 			this.highlight = this.highlightText(this.lines);
 		},
 		getText: function(){
-
+			return this.textData;
 		},
 		onLineSelection: function(i){
 			this.activeLine = util.setActiveLine();
@@ -133,7 +133,8 @@ export default {
 							prop = false;
 						}
 					}	else if (j == 0 && !isString && !isBlank) { // for null, number and boolean
-						result[i] = util.str_splice(result[i],j+1,0,open_2);
+						let level = util.getLevel(result[i]);
+						result[i] = util.str_splice(result[i],level,0,open_2);
 						j += 23;
 					}	else if (result[i].charAt(j) == "," && !isString && !isBlank){
 						result[i] = util.str_splice(result[i],j,0,close);
@@ -154,9 +155,11 @@ export default {
 			return result;
 		},
 		debouncedUpdateLine: _.debounce( function(e) {
+			let savePosition = util.getCaretPositionAll();
 			if (e.data == "[" || e.data == "{") {
-				let a = util.getCaretElement();
-				a.nodeValue += ((e.data == "{") ? "}": "]");
+				let val = util.getCaretElement();
+				let str = val.nodeValue;
+				val.nodeValue = util.str_splice(str,str.indexOf(e.data)+1,0,(e.data == "{" ? "}": "]"));
 			}
 			this.activeLine = util.setActiveLine();
 			this.textData = this.$refs.inputContent.innerText;			
@@ -164,16 +167,31 @@ export default {
 			try {
 				util.validate(this.textData);
 				if (!util.str_isBlank(this.lines[this.activeLine])) {
-					this.highlight[this.activeLine+1] = "";
 					let msg = util.parse(this.textData);
+					let before= this.highlight.length;
 					this.$emit('json_onChange',msg);
+					this.$nextTick(function(){
+						if (savePosition.saveParent){
+							if (before < this.highlight.length) {
+								util.isNewElement(savePosition.saveParent,this.$refs.inputContent,this.highlight[this.activeLine]);
+								this.activeLine++;
+							}
+							else {
+								if (savePosition.saveParent.childNodes[savePosition.index].nodeValue != savePosition.value) {
+									savePosition.savePos -= savePosition.saveParent.childNodes[savePosition.index].nodeValue.length;
+									savePosition.index++;
+								}
+								util.setCaretPosition(savePosition.saveParent,savePosition.index,savePosition.savePos);
+							}
+						}
+					});
 				}
-				this.error = {}
+				this.error = {};
 			} catch (err) {
 				this.error = validate.validateSyntaxError(err.message);
 				eventBus.$emit('jsonSyntax_error',this.error);
 			}
-		}, 600),
+		}, 300),
 		keydownHandler: function(e){
 			switch (e.keyCode) {
 				case 9: // tab
@@ -212,9 +230,6 @@ export default {
 		},
 		activeLine: function(val){
 			eventBus.$emit('activeLine_Change',val);
-		},
-		lines: function(val){
-			this.error = {}
 		}
 	},
 	created(){

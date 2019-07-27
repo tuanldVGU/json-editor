@@ -52,9 +52,9 @@
             <!-- <button @click="test()">SetMainPath</button> -->
 		</div>
 		<!-- Error notification -->
-		<div class="notification is-danger" id="errorMes">
+		<div class="notification is-danger" id="errorMes" v-show="errorNodes.line">
 			<button class="delete" @click.prevent="hideNoti('errorMes')"></button>
-			{{errorNodes.msg}}
+			Line {{errorNodes.line}} has error: {{errorNodes.msg}}
 		</div>
 		<!--Space for parent to add more html  -->
 		<!-- <slot name="no1"></slot> 
@@ -89,7 +89,7 @@ export default {
 	data: function(){
 		return {
 			history: null,
-			errorNodes: {msg:""},
+			errorNodes: {},
 			has_error: no_error,
 			treePath: {},
 			rootNode: {}
@@ -118,14 +118,14 @@ export default {
 		_validateCustom: function(){
 			try {
 				Validator.formatValidator(this.rootNode);
-				this.errorNodes = {msg:""};
+				this.errorNodes = {};
 			} catch (err){
-				this.errorNodes = err;
+				console.log(err);
 				let pkg = {
 					line: this.treePath.getLine(err.index),
 					msg: err.msg
 				};
-				console.log(pkg);
+				this.errorNodes = pkg;
 				eventBus.$emit('ruleViolation',pkg);
 			}
 		},
@@ -197,8 +197,9 @@ export default {
 			this._validateCustom();
 		},
 		errorNodes: function(val){
-			this.has_error= (val.msg != "" ? error : no_error);
-			if (val.msg != "") {
+			let err = (val.msg != "" && val.msg != undefined);
+			this.has_error= ( err ? error : no_error);
+			if (err) {
 				this.showNoti('errorMes');
 			}
 		}
@@ -222,7 +223,7 @@ export default {
 			}
 		});
 		eventBus.$on('jsonSyntax_error', (val) =>{
-			this.errorNodes = {msg: val}
+			this.errorNodes = val;
 		});
 	},
 	mounted() {
