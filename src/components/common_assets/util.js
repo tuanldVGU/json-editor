@@ -5,14 +5,13 @@ var jsonlint = require('./jsonlint/jsonlint.js');
 
 // Parse JSON with more detail error throwback
 exports.parse = function (jsonString) {
-    try {
-        return JSON.parse(jsonString);
-    } catch (err) {
-        // try to throw a more detailed error message using validate
-        exports.validate(jsonString);
-        // then the original error
-        throw err;
-    }
+  try {
+    return JSON.parse(jsonString);
+  } catch (err) {
+    // try to throw a more detailed error message using validate
+    exports.validate(jsonString);
+    throw err; // then the original error
+  }
 };
 
 /*
@@ -20,52 +19,32 @@ exports.parse = function (jsonString) {
  This method uses JSONLint to validate the String. If JSONLint is not available, the built-in JSON parser of the browser is used.
 */
 exports.validate = function (jsonString){
-    if (typeof(jsonlint) != 'undefined') {
-        jsonlint.parse(jsonString);
-    }
-    else {
-        JSON.parse(jsonString);
-    }
+  if (typeof(jsonlint) != 'undefined') {
+    jsonlint.parse(jsonString);
+  }
+  else {
+    JSON.parse(jsonString);
+  }
 };
 
 // Extend object a with the properties of object b
 exports.extend = function (a, b) {
-    for (var prop in b) {
-        if (b.hasOwnProperty(prop)) {
-        a[prop] = b[prop];
-        }
+  for (var prop in b) {
+    if (b.hasOwnProperty(prop)) {
+      a[prop] = b[prop];
     }
-    return a;
+  }
+  return a;
 };
 
 // Remove all properties from object 
 exports.clear = function (a){
-    for (var prop in a) {
-        if (a.hasOwnProperty(prop)) {
-            delete a[prop];
-        }
+  for (var prop in a) {
+    if (a.hasOwnProperty(prop)) {
+      delete a[prop];
     }
-    return a;
-};
-
-/**
- * Returns a function, that, as long as it continues to be invoked, will not
- * be triggered. The function will be called after it stops being called for
- * N milliseconds.
- */
-exports.debounce = function (func, wait, immediate){
-  var timeout;
-  return function() {
-    var context = this, arg = arguments;
-    var later = function () {
-      timeout = null;
-      if (!immediate) func.apply(context,args);
-    }
-    var callNow = immediate && !timeout;
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-    if (callNow) func.apply(context,args);
-  };
+  }
+  return a;
 };
 
 /**
@@ -105,6 +84,13 @@ exports.isBool = function (val) {
 };
 
 /**
+ * Test whether string is blank
+ */
+exports.str_isBlank = function(str){
+  return (!str.replace(/\s/g, '').length) ? true : false;
+}
+
+/**
  * Get cursor location 
  */
 exports.getCaretPosition = function() {
@@ -119,34 +105,30 @@ exports.getCaretPosition = function() {
  * Get cursor location with HTML tag 
  */
 exports.getCaretPositionAll = function() {
-  if (window.getSelection && window.getSelection().getRangeAt && window.getSelection.rangeCount > 0) {
-    var range = window.getSelection().getRangeAt(0);
-    var selectedObj = window.getSelection();
-    var rangeCount = 0;
-    var childNodes = selectedObj.anchorNode.parentNode.childNodes;
-    for (var i = 0; i < childNodes.length; i++) {
-      if (childNodes[i] == selectedObj.anchorNode) {
-        break;
-      }
-      if (childNodes[i].outerHTML)
-        rangeCount += childNodes[i].outerHTML.length;
-      else if (childNodes[i].nodeType == 3) {
-        rangeCount += childNodes[i].textContent.length;
-      }
-    }
-    return range.startOffset + rangeCount;
+  var saveElement = this.getCaretElement();
+  if (saveElement && saveElement.parentNode.tagName =='SPAN') saveElement = saveElement.parentNode;
+  if (saveElement && saveElement.parentNode.tagName =='FONT') saveElement = saveElement.parentNode;
+  if (saveElement) {
+    return {
+      index: this.getRowIndex(saveElement),
+      savePos: this.getCaretPosition(),
+      saveParent: saveElement.parentNode,
+      value: saveElement.nodeValue
+    };
   }
-  return -1;
+  return {};
 };
 
 /**
  * Move caret to a specific point in a DOM element
  */
 exports.setCaretPosition = function(el,dest, pos){
+  if (el == undefined || dest == undefined || pos == undefined ) return;
   // Loop through all child nodes
   let i=0;
   for(var node of el.childNodes){
-    if(i == dest){ // we have a text node
+    if(i == dest){
+      if (node.tagName == "SPAN") node = node.childNodes[0];
       if(node.length >= pos){
         // finally add our range
         var range = document.createRange(),
@@ -155,10 +137,8 @@ exports.setCaretPosition = function(el,dest, pos){
         range.collapse(true);
         sel.removeAllRanges();
         sel.addRange(range);
-        return -1; // we are done
-      }else{
-        break;
-      }
+        return ; // we are done
+      } else {break;}
     }
     i++;
   }
@@ -176,13 +156,37 @@ exports.getCaretElement = function() {
  * Get line level
  */
 exports.getLevel = function(str){
-  let count = (str.includes('[') || str.includes('{')) ? 4 : 0;
+  // let count = (str.includes('[') || str.includes('{')) ? 4 : 0;
+  let count = 0;
 	for (var i=0; i < str.length; i++){
     if (str.charAt(i) != ' ' && str.charAt(i) != '\t') return count;
     count += (str.charAt(i) == ' ')? 1 : 4; 
   }
   return count;
 };
+
+exports.isNewElement = function(checkElement,root,value) {
+  let elementLength = checkElement.childNodes.length;
+  let lastChild = checkElement.childNodes[ elementLength - 1];
+  let rowIndex = this.getRowIndex(checkElement);
+  let row = root.childNodes[rowIndex+1];
+  let dest = -1;
+  let pos = -1;
+  if (lastChild.textContent == ",") {
+    dest = (elementLength == 3 ? 1 : row.childNodes.length - 1);
+    pos = 1;
+  }
+  else {
+    dest = row.childNodes.length - 1;
+    pos = lastChild.textContent[lastChild.textContent.length - 2] == "\"" ? 2 : 1;
+    pos = (dest == 4 ? pos : row.childNodes[dest].innerText.length);
+  }
+  if (dest !=-1) {
+    this.setCaretPosition(row,dest,pos);
+    checkElement.innerHTML = value;	
+    this.activeLine = this.setActiveLine();
+  }
+}
 
 /**
  * Splice function for string
@@ -191,23 +195,30 @@ exports.str_splice = function(str,start, delCount, newSubStr) {
 	return str.slice(0, start) + newSubStr + str.slice(start + Math.abs(delCount));
 };
 
-exports.str_isBlank = function(str){
-  return (!str.replace(/\s/g, '').length) ? true : false;
-}
 
-exports.setActiveLine = function() {
-  if (document.getElementsByClassName('textline-active').length > 0) { document.getElementsByClassName('textline-active')[0].classList.remove('textline-active'); }
-  var el;
-  if (this.getCaretElement().parentNode.tagName == 'PRE') { el = this.getCaretElement().parentNode; }
-  else { el = this.getCaretElement().parentNode.parentNode; }
-  el.classList.add('textline-active');
-  var i = 0;
-  while ( (el = el.previousSibling) != null){
-    i++;
-  } 
-  return i;
+/**
+ * get Active Line 
+ */
+exports.getActiveLine = function(){
+  return document.getElementsByClassName("textline-active")[0];
 };
 
+/**
+ * set Active Line by the current caretPosition
+ */
+exports.setActiveLine = function() {
+  let activeLines = document.getElementsByClassName('textline-active');
+  if (activeLines.length>0) { activeLines[0].classList.remove('textline-active'); }
+  let parent = this.getCaretElement().parentNode;
+  if (parent.classList.contains('input-text-layer')) return 0;
+  if (parent.tagName != 'PRE'){ parent = parent.parentNode; } //select line
+  parent.classList.add('textline-active');
+  return this.getRowIndex(parent);
+};
+
+/**
+ * get child index
+ */
 exports.getRowIndex = function(node) {
   if (node == null) return;
   var i = 0;
@@ -217,6 +228,9 @@ exports.getRowIndex = function(node) {
   return i;
 };
 
+/**
+ * Open Modal with id  = str
+ */
 exports.openModal = function(str){
   let modal = document.getElementById(str);
   let html = document.querySelector('html');
@@ -224,6 +238,9 @@ exports.openModal = function(str){
   html.classList.add('is-clipped');
 }
 
+/**
+ * Close Modal with id  = str
+ */
 exports.closeModal = function(str){
   let modal = document.getElementById(str);
   let html = document.querySelector('html');

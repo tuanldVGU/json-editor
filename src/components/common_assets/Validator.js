@@ -19,9 +19,10 @@ var error = {
 var preserved_keywords = ['class', 'attributes', 'association', 'ends'];
 
 function errorMes(index, error){
+  if (index!="") index = "." + index;
   return {
-    index: "0." + index,
-    msg:"Object "+ index +" has error: " + error
+    index: "0" + index,
+    msg: error
   };
 }
 
@@ -65,7 +66,7 @@ exports.formatValidator = function (json_node){
       me.findInvalidValue(json_node,'root');
     }
     else {
-      errors.push(error.format.root_not_array);
+      throw (errorMes("",error.format.root_not_array));
     }
   }
 }
@@ -89,8 +90,8 @@ exports.UniqueIn = function(element,unqElement,list,obj){
     if (element.value == "" && unqElement=="attributes") return element.childs;  
     if(!list.includes(element.value)) return element.value;
     else {
-      let error = element.value == "" ? element.childs : element.value;
-      throw (errorMes(obj,error.format.existed_element(unqElement) + "\""+ error +"\""));
+      let err = element.value == "" ? element.childs : element.value;
+      throw (errorMes(obj,error.format.existed_element(unqElement) + "\""+ err +"\""));
     }
   }
 }
