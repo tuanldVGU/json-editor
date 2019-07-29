@@ -17,26 +17,20 @@
         <div class="menu">
           <p class="menu-label">Input</p>
           <ul class="menu-list">
-            <li class="menu-item">
-              <span>View mode</span> 
+            <li class="menu-item" v-for="(v,k) in input" v-bind:key="k">
+              <span>{{k}}</span> 
               <label class="switch">
-                  <input type="checkbox"><span class="slider round"></span>
-              </label>
-            </li>
-            <li class="menu-item">
-              <span>Autocomplete</span> 
-              <label class="switch">
-                  <input type="checkbox"><span class="slider round"></span>
+                  <input type="checkbox" v-bind:checked="v" @input="changeValue(0,k,$event)"><span class="slider round"></span>
               </label>
             </li>
             <li class="menu-item"><span>In development</span></li>
           </ul>
           <p class="menu-label">Output</p>
           <ul class="menu-list">
-            <li class="menu-item">
-              <span>View mode</span> 
+            <li class="menu-item" v-for="(v,k) in outline" v-bind:key="k">
+              <span>{{k}}</span> 
               <label class="switch">
-                  <input type="checkbox"><span class="slider round"></span>
+                  <input type="checkbox" v-bind:checked="v" @input="changeValue(1,k,$event)" :disabled="k !='Show' && outline.Show == false"><span class="slider round"></span>
               </label>
             </li>
             <li class="menu-item"><span>In development</span></li>
@@ -44,24 +38,44 @@
         </div>
       </div>
       <!-- footer -->
-      <div class="modal-footer">
-        <button class="button is-primary is-medium m-5">Save</button>
-        <button class="button is-secondary is-medium m-5">Reset</button>
-      </div>
+      <!-- <div class="modal-footer">
+        <button class="button is-primary is-medium m-5" @click="update()">Save</button>
+        <button class="button is-secondary is-medium m-5" @click="reset()">Reset</button>
+      </div> -->
     </div>
     
   </div>
 </template>
 <script>
-
 var util = require('../common_assets/util.js');
-
 export default {
   name: 'config-component',
+  data(){
+    return {
+      input:{},
+      outline:{}
+    };
+  },
+  props:{
+    inp: {
+      type: Object
+    },
+    out: {
+      type: Object
+    }
+  },
   methods: {
     closeConfig: function(){
 			util.closeModal('config-modal');      
-		}
+    },
+    changeValue: function(dest,k,e){
+      if (dest == 0) this.input[k]=e.target.checked;
+      else this.outline[k]=e.target.checked;
+    }
+  },
+  mounted() {
+    this.input = this.inp;
+    this.outline = this.out; 
   }
 }
 </script>

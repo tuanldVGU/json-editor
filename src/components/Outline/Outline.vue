@@ -111,16 +111,11 @@ export default {
 	},
 	methods: {
 		// :TODO
-		_setOptions: function(){
-			// compile a JSON schema validator if a JSON schema is provided
-			// if ( this.options.history ) this.history = new History(this);
-		},
 		_validateCustom: function(){
 			try {
 				Validator.formatValidator(this.rootNode);
 				this.errorNodes = {};
 			} catch (err){
-				console.log(err);
 				let pkg = {
 					line: this.treePath.getLine(err.index),
 					msg: err.msg

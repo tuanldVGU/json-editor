@@ -1,6 +1,5 @@
 'use strict';
 
-var util = require('./util.js');
 var Node = require('./Node.js');
 var error = {
   format: {
@@ -19,9 +18,8 @@ var error = {
 var preserved_keywords = ['class', 'attributes', 'association', 'ends'];
 
 function errorMes(index, error){
-  if (index!="") index = "." + index;
   return {
-    index: "0" + index,
+    index: index == null? "0": ("0." + index),
     msg: error
   };
 }
@@ -66,7 +64,7 @@ exports.formatValidator = function (json_node){
       me.findInvalidValue(json_node,'root');
     }
     else {
-      throw (errorMes("",error.format.root_not_array));
+      throw (errorMes(null,error.format.root_not_array));
     }
   }
 }

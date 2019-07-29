@@ -97,18 +97,21 @@
   }
 }
 
-input:checked + .slider {
-  background-color: #2196F3;
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(18px);
-  -ms-transform: translateX(18px);
-  transform: translateX(18px);
+input {
+  &:checked + .slider {
+    background-color: color(checkbox_slider);
+  }
+  &:disabled + .slider {
+    background-color: color(console_warning)!important;
+  }
+  &:focus + .slider {
+    box-shadow: 0 0 1px color(checkbox_slider);
+  }
+  &:checked + .slider:before {
+    -webkit-transform: translateX(18px);
+    -ms-transform: translateX(18px);
+    transform: translateX(18px);
+  }
 }
 
 /* Rounded sliders */
