@@ -1,10 +1,12 @@
 <template>
 	<div class="editor">
 		<div class="columns is-gapless">
-			<div class="column is-two-thirds">
+			<div :class="{
+					column: true,
+					'is-two-thirds': outline_options.Show
+					}">
 				<menu-component 
-					:json_data='json' 
-					:default_json="defaultJSON"
+					:json_data='json'
 					@json_onChange="onChange($event)">
 				</menu-component>
 				<input-component 
@@ -14,7 +16,7 @@
 					@json_onChange="onChange($event)"
 				></input-component>
 			</div>
-			<div class="column">
+			<div class="column" v-show="outline_options.Show">
 				<outline-component 
 					:node='node'
 					:debounce='DEBOUNCE_INTERVAL'
@@ -29,7 +31,10 @@
 					<component :is="active_component"></component>
 			</keep-alive> -->
 		</div>
-		<config-component></config-component>
+		<config-component 
+			:inp="input_options" 
+			:out="outline_options">
+		</config-component>
 		<about-component></about-component>
 	</div>
 </template>
@@ -50,24 +55,16 @@ export default {
 			json: {},
 			node: {},
 			input_options: {
-				tab_indentation: 2
+				View_mode: false,
+				Autocomplete: true
+			},
+			outline_options: {
+				Show: false,
+				View_mode: false,
+				Autocomplete: true,
 			},
 			DEBOUNCE_INTERVAL: 1500,
-			outline_options: {
-				// addons
-				search: false,
-				history: false,
-				autocomplete: false,
-				// assets
-				schema: null,
-				schemaRefs: null,
-				onSelectionChange: null,
-				navigationBar: true,
-				menuBar: true,
-				// enableSort: true,
-				// enableTransform: true
-			},
-			defaultJSON: {
+			defaultJSON: [{
 				homepage: "https://www.google.com/",
 				thanks: 'you\'re welcome',
 				task: ["Input","OutLine","Menu"],
@@ -76,7 +73,7 @@ export default {
 					color: '#f07818',
 					isFinished: true,
 				}
-			}
+			}]
 		}
 	},
 	components: {

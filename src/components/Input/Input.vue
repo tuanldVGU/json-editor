@@ -18,39 +18,36 @@
 				</div>
 		</div>
 		<!-- content -->
-		<div class="input-outer">
-			<div class="input-linenumber">
-				<template v-for="i in lines.length" >
-					<div v-bind:class="{
-						'input-line': true,
-						'line-number' : true, 
-						'numline-active': (i == activeLine + 1)
-						}" 
-						:key="i"><span class="icon is-sm error-show" v-bind:title="error.message" v-show="error.line && error.line == i"><i class="fas fa-times-circle"></i></span>{{i}}</div>
-				</template>
-			</div>
-			<div class="input-content" 
-					 contenteditable ="true" 
-					 @input="debouncedUpdateLine($event)"
-					 v-on:keydown="keydownHandler($event)"
-					 v-on:keyup="keyupHandler($event)"
-					 >
-				<div class="input-layer input-text-layer" ref="inputContent">
-					<template v-for="(line,i) in highlight" >
-						<pre v-bind:class="{
-						'input-line': true,
-						'line-text' : true
-						}"
-						@input="lineLimit($event)"
-						@click="onLineSelection(i+1)"
-						:key="line.id" v-html="line"></pre>
+		<div class="input-main">
+			<div class="input-outer">
+				<div class="input-linenumber">
+					<template v-for="i in lines.length" >
+						<div v-bind:class="{
+							'input-line': true,
+							'line-number' : true, 
+							'numline-active': (i == activeLine + 1)
+							}" 
+							:key="i"><span class="icon is-sm error-show" v-bind:title="error.msg" v-show="error.line && error.line == i"><i class="fas fa-times-circle"></i></span>{{i}}</div>
 					</template>
 				</div>
-				<!-- <div class="input-layer input-marker-layer"></div> -->
-				<!-- <div class="input-layer input-cursor-layer" v-on:click="onClickEvent">
-					<div class="input-cursor blinking-cursor" v-bind:style="cursor_style">
+				<div class="input-content" 
+						contenteditable ="true" 
+						@input="debouncedUpdateLine($event)"
+						v-on:keydown="keydownHandler($event)"
+						v-on:keyup="keyupHandler($event)"
+						>
+					<div class="input-layer input-text-layer" ref="inputContent">
+						<template v-for="(line,i) in highlight" >
+							<pre v-bind:class="{
+							'input-line': true,
+							'line-text' : true
+							}"
+							@input="lineLimit($event)"
+							@click="onLineSelection(i+1)"
+							:key="line.id" v-html="line"></pre>
+						</template>
 					</div>
-				</div> -->
+				</div>
 			</div>
 		</div>
 		<!-- status -->
@@ -62,11 +59,11 @@
 
 <script>
 import _ from 'lodash';
-import { eventBus } from '../../main';
-import { validate } from '../common_assets/util';
+import { eventBus } from '../../main.js';
 
 var keyCtrl = require('./assets/KeyController.js')
 var util = require('../common_assets/util.js');
+var validate = require('../common_assets/Validator.js');
 
 var error = '<i class="fas fa-exclamation-triangle"></i>';
 
@@ -78,8 +75,7 @@ export default {
 			textData: "",
 			lines: [],
 			highlight: [],
-			error: {},
-			save_position: {}
+			error: {}
 		}
 	},
 	props: {
@@ -97,18 +93,12 @@ export default {
 	},
 	methods: {
 		initInput: function(){
-			this.textData = JSON.stringify(this.json_data,undefined,4)
+			this.textData = JSON.stringify(this.json_data,undefined,4);
 			this.lines = this.textData.split('\n');
 			this.highlight = this.highlightText(this.lines);
 		},
-		focus: function(){
-
-		},
-		format: function(){
-
-		},
 		getText: function(){
-
+			return this.textData;
 		},
 		onLineSelection: function(i){
 			this.activeLine = util.setActiveLine();
@@ -142,7 +132,8 @@ export default {
 							prop = false;
 						}
 					}	else if (j == 0 && !isString && !isBlank) { // for null, number and boolean
-						result[i] = util.str_splice(result[i],j+1,0,open_2);
+						let level = util.getLevel(result[i]);
+						result[i] = util.str_splice(result[i],level,0,open_2);
 						j += 23;
 					}	else if (result[i].charAt(j) == "," && !isString && !isBlank){
 						result[i] = util.str_splice(result[i],j,0,close);
@@ -155,7 +146,7 @@ export default {
 				let start = result[i].split(":")[0];
 				let end = result[i].split(":")[1];
 				if ( (typeof end == 'string') && (trueReg.test(end) || falseReg.test(end)) ) {
-					end = util.str_splice(end,5,0,close);
+					end = (trueReg.test(end) ? util.str_splice(end,5,0,close) : util.str_splice(end,6,0,close));
 					end = util.str_splice(end,0,0,open_2);
 					result[i]= start + ':' + end;
 				}
@@ -163,21 +154,43 @@ export default {
 			return result;
 		},
 		debouncedUpdateLine: _.debounce( function(e) {
+			let savePosition = util.getCaretPositionAll();
+			if (e.data == "[" || e.data == "{") {
+				let val = util.getCaretElement();
+				let str = val.nodeValue;
+				val.nodeValue = util.str_splice(str,str.indexOf(e.data)+1,0,(e.data == "{" ? "}": "]"));
+			}
 			this.activeLine = util.setActiveLine();
 			this.textData = this.$refs.inputContent.innerText;			
 			this.lines = this.textData.split('\n');
 			try {
 				util.validate(this.textData);
 				if (!util.str_isBlank(this.lines[this.activeLine])) {
-					this.highlight[this.activeLine+1] = "";
 					let msg = util.parse(this.textData);
+					let before= this.highlight.length;
 					this.$emit('json_onChange',msg);
+					this.$nextTick(function(){
+						if (savePosition.saveParent){
+							if (before < this.highlight.length) {
+								util.isNewElement(savePosition.saveParent,this.$refs.inputContent,this.highlight[this.activeLine]);
+								this.activeLine++;
+							}
+							else {
+								if (savePosition.saveParent.childNodes[savePosition.index].nodeValue != savePosition.value) {
+									savePosition.savePos -= savePosition.saveParent.childNodes[savePosition.index].nodeValue.length;
+									savePosition.index++;
+								}
+								util.setCaretPosition(savePosition.saveParent,savePosition.index,savePosition.savePos);
+							}
+						}
+					});
 				}
-				this.error = {}
+				this.error = {};
 			} catch (err) {
-				this.error = util.validateError(err.message);
+				this.error = validate.validateSyntaxError(err.message);
+				eventBus.$emit('jsonSyntax_error',this.error);
 			}
-		}, 1500),
+		}, 300),
 		keydownHandler: function(e){
 			switch (e.keyCode) {
 				case 9: // tab
@@ -187,7 +200,7 @@ export default {
 				case 13: //enter
 					e.preventDefault();
 					let res = keyCtrl.customonEnter();
-					if (res) {
+					if (res && res.level>0) {
 						this.activeLine ++;
 						this.lines.splice(res.index,0,res.content);
 						this.highlight = this.highlightText(this.lines);
@@ -215,11 +228,13 @@ export default {
 			this.initInput();
 		},
 		activeLine: function(val){
-			let msg = util.pathVal(this.lines,val);
-			eventBus.$emit('activeLine_Change',msg);
+			eventBus.$emit('activeLine_Change',val);
 		}
 	},
 	created(){
+		eventBus.$on('ruleViolation',(val)=>{
+			this.error = val;
+		});
 	},
 	mounted() {
 		this.initInput();

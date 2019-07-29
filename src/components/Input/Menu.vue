@@ -48,21 +48,18 @@ var defaultName = 'index.json';
 export default {
 	name: 'menu-component',
 	props: {
-		'default_json': {
-			type: Object
-		},
 		'json_data': {
 			default: this.default_json
 		}
 	},
 	data () {
 		return {
-			fileName: ''
+			fileName: defaultName
 		}
 	},
 	methods: {
 		newFile: function(event) {
-			if (this.json_data !== this.default_json) this.$emit('json_onChange', this.default_json);
+			if (this.json_data !== []) this.$emit('json_onChange', []);
 			this.fileName = defaultName;
 		},
 		loadFile: function(event) {
@@ -80,6 +77,7 @@ export default {
 							console.log('Result: '+JSON.stringify(json)); 
 						} catch (err){
 							console.error('JSON file has some errors');
+							alert('File is invalid');
 						}
 					}
 				})(f);
@@ -108,7 +106,6 @@ export default {
 		}
 	},
 	mounted() {
-		this.newFile();
 	}
 }
 </script>
