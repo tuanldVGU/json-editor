@@ -42,18 +42,20 @@
 							'input-line': true,
 							'line-text' : true
 							}"
-							@input="lineLimit($event)"
+							:key="line"
 							@click="onLineSelection(i+1)"
-							:key="line.id" v-html="line"></pre>
+							v-html="line"></pre>
 						</template>
 					</div>
 				</div>
 			</div>
+			<div id="autocompleteInp"></div>
 		</div>
 		<!-- status -->
 		<div class="input-status">
 				Total lines: {{lines.length}}. 
 		</div>
+		
 	</div>
 </template>
 
@@ -64,8 +66,21 @@ import { eventBus } from '../../main.js';
 var keyCtrl = require('./assets/KeyController.js')
 var util = require('../common_assets/util.js');
 var validate = require('../common_assets/Validator.js');
+var AC = require('../common_assets/Autocomplete.js');
 
 var error = '<i class="fas fa-exclamation-triangle"></i>';
+
+function noAutocomplete() {
+	if (document.getElementsByClassName("autocomplete-items").length > 0) {
+		if (document.getElementsByClassName("autocomplete-items")[0].style.display != "none") return false;
+		else return true;
+	} else return true;
+}
+
+function runAutocomplete(target,keyCode){
+	let evt = new KeyboardEvent('keydown', {'keyCode':keyCode, 'which':keyCode});
+	target.dispatchEvent(evt);
+}
 
 export default {
 	name: 'input-component',
@@ -75,7 +90,8 @@ export default {
 			textData: "",
 			lines: [],
 			highlight: [],
-			error: {}
+			error: {},
+			autocomplete: []
 		}
 	},
 	props: {
@@ -105,66 +121,73 @@ export default {
 		},
 		highlightText: function(text){
 			let result = [...text];
-			let open_1 = "<span class='text-prop'>";
-			let open_2 = "<span class='text-val'>";
-			let close = "</span>";
 			for (let i=0; i<result.length; i++){
-				let isOpened = false;
-				let prop = ( result[i].indexOf(':') != -1);
-				let isString = (result[i].indexOf('\"') != -1);
-				let isBlank = util.str_isBlank(result[i]);
-				// highlight string value
-				for (var j=0; j < result[i].length; j++){
-					if (result[i].charAt(j) == '\"' && isString){
-						if (!isOpened){
-							if (prop) {
-								result[i] = util.str_splice(result[i],j+1,0,open_1);
-								j += 24;
-							} else {
-								result[i] = util.str_splice(result[i],j+1,0,open_2);
-								j += 23;
-							}
-							isOpened = true;
-						} else {
-							result[i] = util.str_splice(result[i],j,0,close);
-							j += 7;
-							isOpened = false;
-							prop = false;
-						}
-					}	else if (j == 0 && !isString && !isBlank) { // for null, number and boolean
-						let level = util.getLevel(result[i]);
-						result[i] = util.str_splice(result[i],level,0,open_2);
-						j += 23;
-					}	else if (result[i].charAt(j) == "," && !isString && !isBlank){
-						result[i] = util.str_splice(result[i],j,0,close);
-						j += 7;
-					}
-				}
-				// update boolean value
-				let trueReg = /^ true/;
-				let falseReg = /^ false/;
-				let start = result[i].split(":")[0];
-				let end = result[i].split(":")[1];
-				if ( (typeof end == 'string') && (trueReg.test(end) || falseReg.test(end)) ) {
-					end = (trueReg.test(end) ? util.str_splice(end,5,0,close) : util.str_splice(end,6,0,close));
-					end = util.str_splice(end,0,0,open_2);
-					result[i]= start + ':' + end;
-				}
+				result[i] = this.highlightLine(result[i]);
 			}
 			return result;
 		},
+		highlightLine: function(line){
+			let open_1 = "<span class='text-prop'>";
+			let open_2 = "<span class='text-val'>";
+			let close = "</span>";
+			let isOpened = false;
+			let prop = (line.indexOf(':') != -1);
+			let isString = (line.indexOf('\"') != -1);
+			let isBlank = util.str_isBlank(line);
+			// highlight string value
+			for (var j=0; j < line.length; j++){
+				if (line.charAt(j) == '\"' && isString){
+					if (!isOpened){
+						if (prop) {
+							line = util.str_splice(line,j+1,0,open_1);
+							j += 24;
+						} else {
+							line = util.str_splice(line,j+1,0,open_2);
+							j += 23;
+						}
+						isOpened = true;
+					} else {
+						line = util.str_splice(line,j,0,close);
+						j += 7;
+						isOpened = false;
+						prop = false;
+					}
+				}	else if (j == 0 && !isString && !isBlank) { // for null, number and boolean
+					let level = util.getLevel(line);
+					line = util.str_splice(line,level,0,open_2);
+					j += 23;
+				}	else if (line.charAt(j) == "," && !isString && !isBlank){
+					line = util.str_splice(line,j,0,close);
+					j += 7;
+				}
+			}
+			// update boolean value
+			let trueReg = /^ true/;
+			let falseReg = /^ false/;
+			let start = line.split(":")[0];
+			let end = line.split(":")[1];
+			if ( (typeof end == 'string') && (trueReg.test(end) || falseReg.test(end)) ) {
+				end = (trueReg.test(end) ? util.str_splice(end,5,0,close) : util.str_splice(end,6,0,close));
+				end = util.str_splice(end,0,0,open_2);
+				line= start + ':' + end;
+			}
+			return line;
+		},
 		debouncedUpdateLine: _.debounce( function(e) {
-			let savePosition = util.getCaretPositionAll();
+			let savePosition = util.getCaretPositionAll(); //save postion before update
+			// bracket handling
 			if (e.data == "[" || e.data == "{") {
 				let val = util.getCaretElement();
 				let str = val.nodeValue;
 				val.nodeValue = util.str_splice(str,str.indexOf(e.data)+1,0,(e.data == "{" ? "}": "]"));
 			}
+			// update data
+			if (this.options.Autocomplete) AC.autocomplete(savePosition.saveParent,0,"");
 			this.activeLine = util.setActiveLine();
-			this.textData = this.$refs.inputContent.innerText;			
-			this.lines = this.textData.split('\n');
+			this.textData = this.$refs.inputContent.innerText;
 			try {
 				util.validate(this.textData);
+				this.lines = this.textData.split('\n');
 				if (!util.str_isBlank(this.lines[this.activeLine])) {
 					let msg = util.parse(this.textData);
 					let before= this.highlight.length;
@@ -176,10 +199,10 @@ export default {
 								this.activeLine++;
 							}
 							else {
-								if (savePosition.saveParent.childNodes[savePosition.index].nodeValue != savePosition.value) {
-									savePosition.savePos -= savePosition.saveParent.childNodes[savePosition.index].nodeValue.length;
-									savePosition.index++;
-								}
+								// if (savePosition.saveParent && savePosition.saveParent.childNodes[savePosition.index].nodeValue != savePosition.value) {
+								// 	savePosition.savePos -= savePosition.saveParent.childNodes[savePosition.index].nodeValue.length;
+								// 	savePosition.index++;
+								// }
 								util.setCaretPosition(savePosition.saveParent,savePosition.index,savePosition.savePos);
 							}
 						}
@@ -199,15 +222,28 @@ export default {
 					break;
 				case 13: //enter
 					e.preventDefault();
-					let res = keyCtrl.customonEnter();
-					if (res && res.level>0) {
-						this.activeLine ++;
-						this.lines.splice(res.index,0,res.content);
-						this.highlight = this.highlightText(this.lines);
-						this.$nextTick(function(){
-							util.setCaretPosition(this.$refs.inputContent.childNodes[res.index],0,res.level);
-							this.activeLine = util.setActiveLine();
-						});
+					if (!noAutocomplete()) {
+						let target = this.$refs.inputContent.childNodes[this.activeLine];
+						runAutocomplete(target,e.keyCode);
+					} else {
+						let res = keyCtrl.customonEnter();
+						if (res && res.level>0) {
+							this.activeLine ++;
+							this.lines.splice(res.index,0,res.content);
+							this.highlight = this.highlightText(this.lines);
+							this.$nextTick(function(){
+								let target = this.$refs.inputContent.childNodes[res.index];
+								util.setCaretPosition(target,0,res.level);
+								this.activeLine = util.setActiveLine();
+							});
+						}
+					}
+					break;
+				case 38: // up
+				case 40: // down
+					if (!noAutocomplete()) {
+						e.preventDefault();
+						runAutocomplete(this.$refs.inputContent.childNodes[this.activeLine],e.keyCode);
 					}
 					break;
 			}
@@ -217,7 +253,8 @@ export default {
 			switch (e.keyCode) {
 				case 38: // up
 				case 40: // down
-					this.activeLine = util.setActiveLine();
+					// if no autocomplete
+					if (noAutocomplete()) this.activeLine = util.setActiveLine();
 					break;
 			}
 			this.caret_pos = util.getCaretPosition();
@@ -235,10 +272,22 @@ export default {
 		eventBus.$on('ruleViolation',(val)=>{
 			this.error = val;
 		});
+		eventBus.$on('onChangeInput',(val)=>{
+			let line = util.getRowIndex(val.element);
+			let level = util.getLevel(val.element.innerText);
+			this.lines[line] = ' '.repeat(level) + val.change;
+			this.highlight.splice(line,1,this.highlightLine(this.lines[line]));
+			// this.highlight= this.highlightText(this.lines);
+			this.$nextTick(function(){
+				var target = this.$refs.inputContent.childNodes[line];
+				if (target.innerHTML != this.highlight[line]) target.innerHTML = this.highlight[line];
+				util.setCaretPosition(target,4,1);
+				util.setActiveLine();
+			});
+		});
 	},
 	mounted() {
 		this.initInput();
 	}
 }
-
 </script>

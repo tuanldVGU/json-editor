@@ -98,7 +98,7 @@ import { eventBus } from '../../main.js';
 
 var util = require('../common_assets/util.js');
 var AC = require('../common_assets/Autocomplete.js');
-var autocomplete_lib = ['class','association','super','ends','attributes','name','type'];
+
 
 var expand_btn = '<span class="icon"><i class="fas fa-angle-down"></i></span>';
 var collapse_btn = '<span class="icon"><i class="fas fa-angle-right"></i></span>';
@@ -178,7 +178,7 @@ export default {
       eventBus.$emit('onChangeValue',msg);
     },
     inputHandle: function(event){
-      AC.autocomplete(event.target,autocomplete_lib,this.node_index);
+      AC.autocomplete(event.target,1,this.node_index);
     }
   },
   watch: {

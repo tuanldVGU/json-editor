@@ -113,7 +113,7 @@ exports.getCaretPositionAll = function() {
       index: this.getRowIndex(saveElement),
       savePos: this.getCaretPosition(),
       saveParent: saveElement.parentNode,
-      value: saveElement.nodeValue
+      value: saveElement.nodeValue,
     };
   }
   return {};
