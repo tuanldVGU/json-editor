@@ -49,7 +49,6 @@
 					</div>
 				</div>
 			</div>
-            <!-- <button @click="test()">SetMainPath</button> -->
 		</div>
 		<!-- Error notification -->
 		<div class="notification is-danger" id="errorMes" v-show="errorNodes.line">
@@ -66,12 +65,6 @@
 import { eventBus } from '../../main.js'
 
 import TreeNode from './TreeNode'
-
-var AJV = require('ajv');
-
-// Add addons functions
-var Highlighter = require('../common_assets/Highlighter.js');
-var autocomplete = require('../common_assets/Autocomplete.js');
 
 //Main assets
 var History = require('./assets/History.js')
@@ -223,7 +216,6 @@ export default {
 	},
 	mounted() {
 		this._setRoot(this.node);
-		this._setOptions();
 		this._validateCustom();
 	},
 }
