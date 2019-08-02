@@ -166,15 +166,11 @@ export default {
 		},
 		showNoti: function(req){
 			if (this.has_error == error){
-				let notification = document.getElementById(req);
-				notification.classList.remove('do-show');
-				void notification.offsetWidth;
-				notification.classList.add('do-show');
+				util.showNotification(req);
 			}
 		},
 		hideNoti: function(req){
-			let notification = document.getElementById(req);
-			notification.classList.remove('do-show');
+			util.closeNotification(req);
 		}
 	},
 	watch: {

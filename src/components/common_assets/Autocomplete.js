@@ -1,7 +1,7 @@
 'use strict';
 import {eventBus} from '../../main.js';
 
-var arr = ['class','association','super','ends','attributes','name','type','interface','operation','return','multiplicity'];
+var arr = ['class','association','super','ends','attributes','name','type','interface','operations','methods','return','multiplicity','navigability','owned'];
 
 function outOultine(node_index,change){
   let msg = {
@@ -30,8 +30,6 @@ export function autocomplete (inp, out, node_index) {
   let result = document.createElement("DIV");
   result.setAttribute("class", "autocomplete-items");
   if (out == 0) result.setAttribute("style","top:"+(inp.offsetTop+26)+"px; left:"+(inp.innerText.length*10)+"px;");
-  result.style.display = "none";
-  inp.parentNode.appendChild(result);
   /*for each item in the array...*/
   for (var i = 0; i < arr.length; i++) {
     /*check if the item starts with the same letters as the text field value:*/
@@ -58,7 +56,8 @@ export function autocomplete (inp, out, node_index) {
     }
   }
 
-  if (result && result.childNodes.length > 0) result.style.display = "block";
+  /* check if there are any valid*/
+  if (result && result.childNodes.length > 0) { inp.parentNode.appendChild(result); }
 
   /*execute a function presses a key on the keyboard:*/
   inp.addEventListener("keydown", function(e) {
