@@ -32,7 +32,7 @@
 					<a class="navbar-link is-arrowless"><i class="fas fa-ellipsis-h"></i></a> 
 					<div class="navbar-dropdown is-right">
 						<a class="navbar-item" @click="openConfig()">Config</a>
-						<p class="navbar-item">v0.01</p>
+						<p class="navbar-item">v0.33</p>
 					</div>
 				</div>
 			</div>
@@ -41,7 +41,8 @@
 </template>
 
 <script>
-// import { eventBus } from '../../main.js'
+import { eventBus } from '../../main.js';
+
 var util = require('../common_assets/util.js');
 var defaultName = 'index.json';
 
@@ -105,7 +106,20 @@ export default {
 			util.openModal('config-modal');
 		}
 	},
-	mounted() {
+	created() {
+		eventBus.$on('sys_action',(val)=>{
+			switch (val) {
+				case 'new':
+					this.newFile();
+					break;
+				case 'load':
+					this.loadFile();
+					break;
+				case 'new':
+					this.saveFile();
+					break;
+			}
+		});
 	}
 }
 </script>

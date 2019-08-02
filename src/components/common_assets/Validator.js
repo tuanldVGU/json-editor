@@ -5,8 +5,8 @@ var error = {
   format: {
     root_not_array: "The root must be array.",
     no_class_or_association: "There is no class or association in this child.",
-    class_pair: "Class need to be pair with super or attributes.",
-    association_pair: "Association need to be pair with super or attributes.",
+    class_pair: "Class need to be pair with super, attributes or methods.",
+    association_pair: "Association need to be pair with ends.",
     invalid_keyValue: "is preserve for key.",
     attributes_not_array: "Attribute must be type array.",
     attributes_duplicate: "Attribute is duplicated ",
@@ -58,8 +58,8 @@ exports.formatValidator = function (json_node){
           }
         });
         if (!fields.includes('class') && !fields.includes('association') ) throw (errorMes(i,error.format.no_class_or_association));
-        else if (fields.includes('class') && !(fields.includes('super') || fields.includes('attributes'))) throw (errorMes(i,error.format.class_pair));
-        else if (fields.includes('association') && !(fields.includes('super') || fields.includes('attributes'))) throw(errorMes(i,error.format.association_pair));
+        else if (fields.includes('class') && !(fields.includes('super') || fields.includes('attributes')|| fields.includes('methodss'))) throw (errorMes(i,error.format.class_pair));
+        else if (fields.includes('association') && !fields.includes('ends')) throw(errorMes(i,error.format.association_pair));
       });
       me.findInvalidValue(json_node,'root');
     }
