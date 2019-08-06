@@ -168,6 +168,29 @@ exports.getLevel = function(str){
   return count;
 };
 
+exports.isNewElement = function(checkElement,root,value) {
+  let elementLength = checkElement.childNodes.length;
+  let lastChild = checkElement.childNodes[ elementLength - 1];
+  let rowIndex = this.getRowIndex(checkElement);
+  let row = root.childNodes[rowIndex+1];
+  let dest = -1;
+  let pos = -1;
+  if (lastChild.textContent == ",") {
+    dest = (elementLength == 3 ? 1 : row.childNodes.length - 1);
+    pos = 1;
+  }
+  else {
+    dest = row.childNodes.length - 1;
+    pos = lastChild.textContent[lastChild.textContent.length - 2] == "\"" ? 2 : 1;
+    pos = (dest == 4 ? pos : row.childNodes[dest].innerText.length);
+  }
+  if (dest !=-1) {
+    this.setCaretPosition(row,dest,pos);
+    checkElement.innerHTML = value;	
+    this.activeLine = this.setActiveLine();
+  }
+}
+
 /**
  * Check if there is a new elements
  */

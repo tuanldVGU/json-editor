@@ -100,7 +100,6 @@ import { eventBus } from '../../main.js';
 var util = require('../common_assets/util.js');
 var AC = require('../common_assets/Autocomplete.js');
 
-
 var expand_btn = '<span class="icon"><i class="fas fa-angle-down"></i></span>';
 var collapse_btn = '<span class="icon"><i class="fas fa-angle-right"></i></span>';
 

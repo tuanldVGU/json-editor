@@ -67,6 +67,7 @@ var History = require('./assets/History.js')
 var TreePath = require('./assets/TreePath.js');
 
 var Node = require('../common_assets/Node.js');
+var Validator = require('../common_assets/Validator.js')
 var util = require('../common_assets/util.js');
 
 var error = '<i class="fas fa-exclamation-triangle"></i>';
@@ -189,7 +190,7 @@ export default {
 	},
 	mounted() {
 		this._setRoot(this.node);
-	}
+  }
 }
 </script>
 

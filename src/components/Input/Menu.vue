@@ -77,7 +77,7 @@ export default {
 							me.fileName = file.name;
 							console.log('Result: '+JSON.stringify(json)); 
 						} catch (err){
-							console.error('JSON file has some errors',err);
+							console.error('JSON file has some errors:',err);
 							alert('File is invalid');
 						}
 					}

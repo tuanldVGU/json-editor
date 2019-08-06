@@ -130,6 +130,7 @@ export default {
 								};
 							}
 						}
+
 					}
 				} catch(err){}
 			},debounce_interval));
@@ -155,6 +156,9 @@ export default {
 		}
 	},
 	created(){
+		eventBus.$on('ruleViolation',(val)=>{
+			this.error = val;
+		});
 	},
 	mounted() {
 		this.setOptions();
