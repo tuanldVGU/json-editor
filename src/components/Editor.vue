@@ -11,7 +11,7 @@
 				</menu-component>
 				<input-component 
 					:json_data='json'
-					:debounce='DEBOUNCE_INTERVAL'
+					:change_from ='change_from'
 					:options='input_options'
 					@json_onChange="onChange($event)"
 				></input-component>
@@ -19,7 +19,6 @@
 			<div class="column" v-show="outline_options.Show">
 				<outline-component 
 					:node='node'
-					:debounce='DEBOUNCE_INTERVAL'
 					:options='outline_options'
 					@json_onChange="onChange($event)"
 				></outline-component>
@@ -54,16 +53,16 @@ export default {
 		return {
 			json: {},
 			node: {},
+			change_from: "",
 			input_options: {
 				View_mode: false,
 				Autocomplete: true
 			},
 			outline_options: {
 				Show: false,
-				View_mode: false,
+				View_mode: true,
 				Autocomplete: true,
 			},
-			DEBOUNCE_INTERVAL: 1500,
 			defaultJSON: [{
 				homepage: "https://www.google.com/",
 				thanks: 'you\'re welcome',
@@ -104,8 +103,9 @@ export default {
 			}
 		},
 		onChange: function(val){
-			this.json = val;
-			this.setData(val);
+			this.json = val.msg;
+			this.change_from = val.from;
+			this.setData(val.msg);
 		}
 	},
 	created(){

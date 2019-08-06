@@ -9,7 +9,7 @@ exports.parse = function (jsonString) {
     return JSON.parse(jsonString);
   } catch (err) {
     // try to throw a more detailed error message using validate
-    exports.validate(jsonString);
+    this.validate(jsonString);
     throw err; // then the original error
   }
 };
