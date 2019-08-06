@@ -25,7 +25,7 @@
             </li>
             <li class="menu-item"><span>In development</span></li>
           </ul>
-          <p class="menu-label">Output</p>
+          <p class="menu-label">Outline</p>
           <ul class="menu-list">
             <li class="menu-item" v-for="(v,k) in outline" v-bind:key="k">
               <span>{{k}}</span> 

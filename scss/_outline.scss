@@ -3,6 +3,11 @@
   height: calc(100%);
 }
 
+.outline-main {
+  position: relative;
+  min-height: 0;
+}
+
 .outline-content {
   border-left: 0.1px solid #fff;
   display: grid;

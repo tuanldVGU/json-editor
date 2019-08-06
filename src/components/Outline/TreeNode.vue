@@ -44,7 +44,7 @@
                       'outline-readonly': isRoot() || !isNaN(node_field),
                       'node-value': true
                       }" 
-                      v-bind:contenteditable="!isRoot() && isNaN(node_field)" 
+                      v-bind:contenteditable="!editable && !isRoot() && isNaN(node_field)" 
                       v-on:keydown.enter.prevent="onChangeValue('field',$event)"
                       @input="inputHandle($event)"
                     >{{node_field}}</div>
@@ -61,13 +61,13 @@
                     </div>
                     <div v-else-if="nodeValue() == 'color'" class="node-value" >
                       <div class="value-color" v-bind:style="{ backgroundColor: this.node_value}" style="display: inline-block"></div>
-                      <div v-bind:contenteditable="(this.type == 'auto')" style="display: inline-block" v-on:keydown.enter.prevent="onChangeValue('val',$event)">{{node_value}} </div>
+                      <div :contenteditable="!editable && this.type == 'auto'" style="display: inline-block" v-on:keydown.enter.prevent="onChangeValue('val',$event)">{{node_value}} </div>
                     </div>
                     <div v-else-if="nodeValue() == 'string'" class="node-value" >
-                      <div contenteditable="true" class="value-string" v-on:keydown.enter.prevent="onChangeValue('val',$event)">{{node_value}}</div>
+                      <div :contenteditable='!editable' class="value-string" v-on:keydown.enter.prevent="onChangeValue('val',$event)">{{node_value}}</div>
                     </div>
                     <div v-else class="node-value" >
-                      <div contenteditable="true" v-on:keydown.enter.prevent="onChangeValue('val',$event)" v-html="nodeValue()">{{node_value}}</div>
+                      <div :contenteditable='!editable' v-on:keydown.enter.prevent="onChangeValue('val',$event)" v-html="nodeValue()">{{node_value}}</div>
                     </div>
                   </td>
                 </tr>
@@ -85,6 +85,7 @@
             :showChild ='false'
             :node_field="child.field.toString()"
             :node_index="node_index +'.'+index"
+            :editable="editable"
             v-bind:key="child.id"
             v-show="isExpanded"
             >
@@ -98,7 +99,6 @@ import { eventBus } from '../../main.js';
 
 var util = require('../common_assets/util.js');
 var AC = require('../common_assets/Autocomplete.js');
-var autocomplete_lib = ['class','association','super','ends','attributes','name','type'];
 
 var expand_btn = '<span class="icon"><i class="fas fa-angle-down"></i></span>';
 var collapse_btn = '<span class="icon"><i class="fas fa-angle-right"></i></span>';
@@ -134,7 +134,10 @@ export default {
     },
     node_index:{
       type: String
-    } 
+    },
+    editable: {
+      type: Boolean
+    }
   },
   methods: {
     isRoot: function(){
@@ -178,7 +181,7 @@ export default {
       eventBus.$emit('onChangeValue',msg);
     },
     inputHandle: function(event){
-      AC.autocomplete(event.target,autocomplete_lib,this.node_index);
+      AC.autocomplete(event.target,1,this.node_index);
     }
   },
   watch: {

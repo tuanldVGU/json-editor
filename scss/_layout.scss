@@ -1,8 +1,12 @@
 html{
   height: calc(100%);
+  scroll-behavior: smooth;
 }
 body {
   height: calc(100% - 54px);
+}
+.footer {
+  padding: 30px 24px !important;
 }
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;

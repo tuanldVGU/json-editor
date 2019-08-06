@@ -32,7 +32,7 @@
 					<a class="navbar-link is-arrowless"><i class="fas fa-ellipsis-h"></i></a> 
 					<div class="navbar-dropdown is-right">
 						<a class="navbar-item" @click="openConfig()">Config</a>
-						<p class="navbar-item">v0.01</p>
+						<p class="navbar-item">v0.33</p>
 					</div>
 				</div>
 			</div>
@@ -41,7 +41,8 @@
 </template>
 
 <script>
-// import { eventBus } from '../../main.js'
+import { eventBus } from '../../main.js';
+
 var util = require('../common_assets/util.js');
 var defaultName = 'index.json';
 
@@ -59,7 +60,7 @@ export default {
 	},
 	methods: {
 		newFile: function(event) {
-			if (this.json_data !== []) this.$emit('json_onChange', []);
+			if (this.json_data !== []) this.emitToEditor([]);
 			this.fileName = defaultName;
 		},
 		loadFile: function(event) {
@@ -72,11 +73,11 @@ export default {
 					return function(e){
 						try {
 							var json = JSON.parse(e.target.result);
-							me.$emit('json_onChange',json);
-							me.fileName = file.name
+							me.emitToEditor(json);
+							me.fileName = file.name;
 							console.log('Result: '+JSON.stringify(json)); 
 						} catch (err){
-							console.error('JSON file has some errors');
+							console.error('JSON file has some errors:',err);
 							alert('File is invalid');
 						}
 					}
@@ -88,7 +89,9 @@ export default {
 			var me = this;
 			var element = document.createElement('a');
 
-			var jsonString = JSON.stringify(this.json_data);
+			var data = document.getElementById('input').innerText.split('\n');
+			data.splice(0,data.length/2);
+			var jsonString = data.join('\n');
 			var file = new Blob([jsonString],{type:"octet/stream"})
 
 			element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonString));
@@ -103,9 +106,29 @@ export default {
 		},
 		openConfig: function(){
 			util.openModal('config-modal');
+		},
+		emitToEditor: function(val){
+			let pkg ={
+				msg: val,
+				from: 'menu'
+			}
+			this.$emit('json_onChange', pkg);
 		}
 	},
-	mounted() {
+	created() {
+		eventBus.$on('sys_action',(val)=>{
+			switch (val) {
+				case 'new':
+					this.newFile();
+					break;
+				case 'load':
+					this.loadFile();
+					break;
+				case 'new':
+					this.saveFile();
+					break;
+			}
+		});
 	}
 }
 </script>

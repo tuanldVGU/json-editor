@@ -9,7 +9,7 @@ exports.parse = function (jsonString) {
     return JSON.parse(jsonString);
   } catch (err) {
     // try to throw a more detailed error message using validate
-    exports.validate(jsonString);
+    this.validate(jsonString);
     throw err; // then the original error
   }
 };
@@ -113,7 +113,7 @@ exports.getCaretPositionAll = function() {
       index: this.getRowIndex(saveElement),
       savePos: this.getCaretPosition(),
       saveParent: saveElement.parentNode,
-      value: saveElement.nodeValue
+      value: saveElement.nodeValue,
     };
   }
   return {};
@@ -132,7 +132,7 @@ exports.setCaretPosition = function(el,dest, pos){
       if(node.length >= pos){
         // finally add our range
         var range = document.createRange(),
-          sel = window.getSelection();
+            sel = window.getSelection();
         range.setStart(node,pos);
         range.collapse(true);
         sel.removeAllRanges();
@@ -144,6 +144,9 @@ exports.setCaretPosition = function(el,dest, pos){
   }
 };
 
+/**
+ * Get caret elements
+ */
 exports.getCaretElement = function() {
   if (window.getSelection && window.getSelection().getRangeAt && window.getSelection().rangeCount > 0)  {
     var range = window.getSelection().getRangeAt(0);
@@ -189,6 +192,24 @@ exports.isNewElement = function(checkElement,root,value) {
 }
 
 /**
+ * Check if there is a new elements
+ */
+exports.isNewElement = function(checkElement,root,value) {
+  let elementLength = checkElement.childNodes.length;
+  let lastChild = checkElement.childNodes[ elementLength - 1];
+  let rowIndex = this.getRowIndex(checkElement);
+  let row = root.childNodes[rowIndex+1];
+  if (lastChild.textContent != ",") {
+    let dest = row.childNodes.length - 1;
+    let pos = lastChild.textContent[lastChild.textContent.length - 2] == "\"" ? 2 : 1;
+    pos = (dest == 4 ? pos : row.childNodes[dest].innerText.length);
+    this.setCaretPosition(row,dest,pos);
+    checkElement.innerHTML = value;	
+    this.activeLine = this.setActiveLine();
+  }
+}
+
+/**
  * Splice function for string
  */
 exports.str_splice = function(str,start, delCount, newSubStr) {
@@ -222,9 +243,7 @@ exports.setActiveLine = function() {
 exports.getRowIndex = function(node) {
   if (node == null) return;
   var i = 0;
-  while (node = node.previousSibling) {
-    ++i;
-  }
+  while (node = node.previousSibling) {++i;}
   return i;
 };
 
@@ -247,3 +266,22 @@ exports.closeModal = function(str){
   modal.classList.remove('is-active');
   html.classList.remove('is-clipped');
 }
+
+/**
+ * Show Notification with id 
+ */
+exports.showNotification = function(id) {
+  let notification = document.getElementById(id);
+  notification.classList.remove('do-show');
+  void notification.offsetWidth;
+  notification.classList.add('do-show');
+}
+
+/**
+ * Close Notification with id  
+ */
+exports.closeNotification = function(id) {
+  let notification = document.getElementById(id);
+  notification.classList.remove('do-show');
+}
+
