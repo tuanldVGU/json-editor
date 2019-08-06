@@ -21,10 +21,3 @@ export default {
 }
 </script>
 
-<style>
-.footer {
-    overflow: hidden; 
-    padding: 50px 24px;
-}
-</style>
-

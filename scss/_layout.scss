@@ -6,7 +6,8 @@ body {
   height: calc(100% - 54px);
 }
 .footer {
-  padding: 30px 24px !important;
+  overflow: hidden;
+  padding: 30px 24px;
 }
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
