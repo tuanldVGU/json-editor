@@ -5,11 +5,6 @@
 			<div class="navbar-brand">
 				<div class="navbar-item">Outline</div>
 			</div>
-			<div class="navbar-menu">
-				<div class="navbar-end">
-					<a class="navbar-item" @click.prevent="showNoti('errorMes')"><span class="icon" v-html="has_error"></span></a>
-				</div>
-			</div>
 		</nav>
     <!-- Content -->
 		<div class="outline-content">
@@ -30,7 +25,7 @@
 			<div class="outline-navigationbar" v-html="treePath.selectedPath">
 			</div>
       <!-- code outline -->
-			<div class="input-main">
+			<div class="outline-main">
 				<div class="outline-content-outer">
 					<div v-bind:class="{
 						'has-menu-bar': options.menuBar,
@@ -43,7 +38,8 @@
 									:node_value='rootNode.value'
 									:showChild ='true'
 									:node_field="rootNode.field"
-									:node_index="'0'">
+									:node_index="'0'"
+									:editable="options.View_mode">
 								</tree-component>
 							</template>
 					</div>
@@ -51,10 +47,10 @@
 			</div>
 		</div>
 		<!-- Error notification -->
-		<div class="notification is-danger" id="errorMes" v-show="errorNodes.line">
+		<!-- <div class="notification is-danger" id="errorMes" v-show="errorNodes.line">
 			<button class="delete" @click.prevent="hideNoti('errorMes')"></button>
 			Line {{errorNodes.line}} has error: {{errorNodes.msg}}
-		</div>
+		</div> -->
 		<!--Space for parent to add more html  -->
 		<!-- <slot name="no1"></slot> 
 		<slot name="no2"></slot>  -->
@@ -71,7 +67,6 @@ var History = require('./assets/History.js')
 var TreePath = require('./assets/TreePath.js');
 
 var Node = require('../common_assets/Node.js');
-var Validator = require('../common_assets/Validator.js')
 var util = require('../common_assets/util.js');
 
 var error = '<i class="fas fa-exclamation-triangle"></i>';
@@ -103,20 +98,6 @@ export default {
 		}
 	},
 	methods: {
-		// :TODO
-		_validateCustom: function(){
-			try {
-				Validator.formatValidator(this.rootNode);
-				this.errorNodes = {};
-			} catch (err){
-				let pkg = {
-					line: this.treePath.getLine(err.index),
-					msg: err.msg
-				};
-				this.errorNodes = pkg;
-				eventBus.$emit('ruleViolation',pkg);
-			}
-		},
 		// :TODO
 		updateExpand: function(option,val){
 			var msg = {isExpanded: option, val: val};
@@ -178,14 +159,6 @@ export default {
 			if (val != this.rootNode) {
 				this._setRoot(val);
 			}
-			this._validateCustom();
-		},
-		errorNodes: function(val){
-			let err = (val.msg != "" && val.msg != undefined);
-			this.has_error= ( err ? error : no_error);
-			if (err) {
-				this.showNoti('errorMes');
-			}
 		}
 	},
 	created(){
@@ -201,7 +174,11 @@ export default {
 		eventBus.$on('onChangeValue', (option) =>{
 			try {
 				this.rootNode.setNodebyIndex(option.index,option.target,option.change);
-				this.$emit('json_onChange',this.rootNode.getValue());
+				let pkg = {
+					msg: this.rootNode.getValue(),
+					from: 'outline'
+				}
+				this.$emit('json_onChange',pkg);
 			} catch (err){
 				this.errorNodes = err;
 			}
@@ -212,8 +189,7 @@ export default {
 	},
 	mounted() {
 		this._setRoot(this.node);
-		this._validateCustom();
-	},
+	}
 }
 </script>
 
