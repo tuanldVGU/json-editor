@@ -5,7 +5,7 @@
       <div class="columns aboutme">
         <div class="column is-one-quarter avatar-area">
           <figure class="image">
-            <img src="/src/assets/img/avatar.jpg">
+            <img src="../../static/avatar.jpg">
           </figure>
           <h4 class="title is-5">Lu Dinh Tuan</h4>
           <h5 class="subtitle is-6">B.Sc Computer Science 2015-2019</h5>
@@ -15,10 +15,10 @@
           <h5 class="subtitle">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer ex velit, viverra non vulputate vitae, blandit vitae nisl. Nullam fermentum orci et erat viverra bibendum.</h5>
           <div class="level">
             <div class="level-item has-text-centered">
-              <figure class="image is-128x64"><img src="/src/assets/img/vgu.png"></figure>
+              <figure class="image is-128x64"><img src="../../static/vgu.png"></figure>
             </div>
             <div class="level-item has-text-centered">
-              <figure class="image is-128x64"><img src="/src/assets/img/fuas.png"></figure>
+              <figure class="image is-128x64"><img src="../../static/fuas.png"></figure>
             </div>
           </div>
         </div>
