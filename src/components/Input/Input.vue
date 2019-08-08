@@ -82,16 +82,20 @@ export default {
 			this.updateInput(this.json_data);
 			this.editor.setBehavioursEnabled(true);
 			let staticWordCompleter = {
-					getCompletions: function(editor, session, pos, prefix, callback) {
-							var wordList = ['class','association','super','ends','attributes','name','type','interface','operations','methods','return','multiplicity','navigability','owned'];
-							callback(null, wordList.map(function(word) {
-									return {
-											caption: word,
-											value: word,
-											meta: "static"
-									};
-							}));
-					}
+				getCompletions: function(editor, session, pos, prefix, callback) {
+					var wordList = ['class','association','super','ends','attributes','name','type'];
+					callback(null, wordList.map(function(word) {
+						// auto close "" if users not already do it
+						let close = '';
+						let line = session.getLine(pos.row);
+						if (line.charAt(pos.column) != "\"" && line.charAt(pos.column-prefix.length-1) == "\"") close = "\"";
+						return {
+							caption: word,
+							value: word+close,
+							meta: "static"
+						};
+					}));
+				}
 			}
 			this.editor.setOptions({
 				enableBasicAutocompletion: me.options.Autocomplete,

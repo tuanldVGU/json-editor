@@ -1,0 +1,40 @@
+[
+  {
+      "class": "Student",
+      "attributes":
+      [
+          {
+              "name": "name", "type": "String"
+          },
+          {
+              "not-name": "grade", "not-type": "Integer"
+          },
+          {
+              "name": "isAlumni", "type": "Boolean"
+          }
+      ]
+  },
+  {
+      "class": "Lecturer",
+      "attributes": 
+      [
+          {
+              "name": "name"
+          },
+          {
+              "name": "major", "type": "Student"
+          }
+      ]
+  },
+  {
+      "association": "Course"
+  },
+  {
+      "association": "Another-Test",
+      "ends": "invalid"
+  },
+  {
+      "association": "Another-Test-2",
+      "ends": ["missing-1-end"]
+  }
+]

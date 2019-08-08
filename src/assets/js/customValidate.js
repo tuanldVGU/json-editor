@@ -6,24 +6,26 @@ var error = {
   format: {
     root_not_array: "The root must be array.",
     no_class_or_association: "There is no class or association in this child.",
-    class_pair: "Class need to be pair with super, attributes or methods.",
+    class_pair: "Class need to be pair with super, attributes.",
     association_pair: "Association need to be pair with ends.",
-    invalid_keyValue: "is preserve for key.",
+    invalid_key: "is an undefined key.",
     attributes_not_array: "Attribute must be type array.",
     attributes_duplicate: "Attribute is duplicated ",
     existed_element: function(e) {
       return "The following class is already declared " + e;
-    }
+    },
+    ends_is_array: "Ends must be an array.",
+    ends_length: "Ends must has more than 1 value."
   }
 };
-var preserved_keywords = ['class', 'attributes', 'association', 'ends'];
+var preserved_keywords = ['class','association','super','ends','attributes','name','type'];
 
-function errorMes(pos, error){
+function errorMes(pos, error, type){
   return {
     column: pos.column,
     row: pos.row,
     text: error,
-    type: 'error'
+    type: type
   };
 }
 
@@ -35,9 +37,15 @@ exports.formatValidate = function (json_string){
   if (json instanceof Array) {
     let className = [];
     let associationName = [];
-    json.every( function(element,i){
-      let fields= [];
+    try {
+      validKeyword(map,[0],json);
+    } catch(err){
+      out.push(err);
+      return out;
+    }
+    json.every(function(element,i){
       try {
+        let fields = [];
         var j=0;
         let location;
         let pos;
@@ -45,51 +53,80 @@ exports.formatValidate = function (json_string){
           location = [0,i,j];
           pos = getPos(map,location);
           let value = element[key];
-          if (!value instanceof Array) {
-            if (preserved_keywords.includes(value)) 
-              throw (errorMes(pos," \"" + node.value + "\" " + error.format.invalid_keyValue));
-          }
           fields.push(key);
-          className.push(me.UniqueIn(value,'class',className,pos));
-          associationName.push(me.UniqueIn(value,'association',associationName,pos));
+          className.push(UniqueIn(value,'class',className,pos));
+          associationName.push(UniqueIn(value,'association',associationName,pos));
           if (key == 'attributes') {
-            if (!json instanceof Array) throw (errorMes(pos,error.format.attributes_not_array));
-            let checkAttribute = me.UniqueAttribute(value);
+            if (!json instanceof Array) throw (errorMes(pos,error.format.attributes_not_array,'error'));
+            let checkAttribute = UniqueAttribute(value);
             if (checkAttribute) {
               location = location.concat(checkAttribute.index);
               pos = getPos(map,location);
-              throw (errorMes(pos,error.format.attributes_duplicate +"\"" + checkAttribute.msg +"\""));
+              throw (errorMes(pos,error.format.attributes_duplicate +"\"" + checkAttribute.msg +"\"",'error'));
             }
           }
           j++;
         }
         location = [0,i];
         pos = getPos(map,location);
-        if (!fields.includes('class') && !fields.includes('association') ) throw (errorMes(pos,error.format.no_class_or_association));
-        else if (fields.includes('class') && !(fields.includes('super') || fields.includes('attributes')|| fields.includes('methodss'))) throw (errorMes(pos,error.format.class_pair));
-        else if (fields.includes('association') && !fields.includes('ends')) throw(errorMes(pos,error.format.association_pair));
+        if (!fields.includes('class') && !fields.includes('association') ) throw (errorMes(pos,error.format.no_class_or_association,'error'));
+        else if (fields.includes('class') && !(fields.includes('super') || fields.includes('attributes'))) throw (errorMes(pos,error.format.class_pair,'warning'));
+        else if (fields.includes('association') && !fields.includes('ends')) throw (errorMes(pos,error.format.association_pair,'warning'));
       } catch (err) {
         out.push(err);
-        return;
       }
+      return (out.length <1);
     });
   } else {
     let pos = getPos(map,[0]);
-    out.push(errorMes(pos,error.format.root_not_array))
+    out.push(errorMes(pos,error.format.root_not_array));
     return out;
   }
   return out;
 }
 
-exports.UniqueIn = function(val,unqElement,list,obj){
-  if (val == "" && unqElement=="attributes") return val;
-  if(!list.includes(val)) return val;
-  else {
-    throw (errorMes(obj,error.format.existed_element(unqElement) + " \""+ val +"\""));
+function validKeyword(map,res,json){
+  let location;
+  if (json instanceof Array) {
+    json.forEach(function(element,i){
+      location = res.slice(0);
+      location.push(i);
+      validKeyword(map,location,element);
+    });
+  }
+  if (json instanceof Object){
+    let pos;
+    let keys = Object.keys(json);
+    let values = Object.values(json);
+    for (var i = 0; i<keys.length; i++){
+      location = res.slice(0);
+      location.push(i);
+      pos = getPos(map,location);
+      if (!preserved_keywords.includes(keys[i]) && isNaN(keys[i])) {
+        throw (errorMes(pos," \"" + keys[i] + "\" " + error.format.invalid_key,'error'));
+      }
+      if (keys[i] == 'ends'){
+        if (values[i] instanceof Array)  {
+          if (values[i].length <= 1) throw (errorMes(pos,error.format.ends_length,'error'));
+        }else throw (errorMes(pos,error.format.ends_is_array,'error'));
+      }
+
+      if (values[i] instanceof Array){
+        validKeyword(map,location,values[i]);
+      }
+    }
   }
 }
 
-exports.UniqueAttribute = function(arr){
+function UniqueIn(val,unqElement,list,obj){
+  if (val == "" && unqElement=="attributes") return val;
+  if(!list.includes(val)) return val;
+  else {
+    throw (errorMes(obj,error.format.existed_element(unqElement) + " \""+ val +"\"",'error'));
+  }
+}
+
+function UniqueAttribute(arr){
   var checkArray = [];
   for (var i = 0; i< arr.length; i++){
     var checkObj = "";
