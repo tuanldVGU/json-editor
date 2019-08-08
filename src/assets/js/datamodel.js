@@ -299,7 +299,6 @@ ace.define("ace/mode/custom",["require","exports","module","ace/lib/oop","ace/mo
       worker.on("annotate", function(e) {
         let err = e.data;
         if (err.length == 0) {
-          // console.log(customValidate.formatValidate(session.getValue()));
           err = customValidate.formatValidate(session.getValue());
         }
         session.setAnnotations(err);
