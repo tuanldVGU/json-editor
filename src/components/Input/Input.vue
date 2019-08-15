@@ -68,7 +68,7 @@ export default {
 	},
 	methods: {
 		updateInput: function(val){
-			this.textData = JSON.stringify(val,undefined,2);
+			this.textData = JSON.stringify(val,undefined,4);
 			this.editor.setValue(this.textData,-1);
 		},
 		setOptions: function(){
@@ -83,7 +83,7 @@ export default {
 			this.editor.setBehavioursEnabled(true);
 			let staticWordCompleter = {
 				getCompletions: function(editor, session, pos, prefix, callback) {
-					var wordList = ['class','association','super','ends','attributes','name','type'];
+					var wordList = me.getAutocompleteList();
 					callback(null, wordList.map(function(word) {
 						// auto close "" if users not already do it
 						let close = '';
@@ -102,12 +102,14 @@ export default {
 				// enableSnippets: true,
 				enableLiveAutocompletion: true
 			});
-			langTools.addCompleter(staticWordCompleter);
+			langTools.setCompleters([staticWordCompleter]);
 		},
 		setEvents: function(){
 			var me = this;
 			this.editor.on('change',_.debounce(function(e){
-				// me.editor.commands.byName.startAutocomplete.exec(me.editor);
+				if (e.lines[0] == "\"\""){
+					me.editor.commands.byName.startAutocomplete.exec(me.editor);
+				};
 				let val = me.editor.getValue();
 				if (me.textData != val) {
 					me.textData = val;
@@ -145,6 +147,37 @@ export default {
 		compact: function(){
 			this.textData = JSON.stringify(this.json_data);
 			this.editor.setValue(this.textData,1);
+		},
+		getAutocompleteList: function(){
+			let wordList = ['class','association','super','ends','attributes','name','type','classes'];
+			let caretPos = this.editor.getCursorPosition();
+			for (var row = caretPos.row; row >0; row--){
+				let inElement = this.editor.session.getLine(row).replace(/\s/g,'');
+				inElement = inElement.split("\"");
+				for (var i=(inElement.length-1); i>0; i--){
+					if (wordList.includes(inElement[i])){
+						switch (inElement[i]){
+							case 'class':
+								return ['attributes','super'];
+								break;
+							case 'association':
+								return ['ends','classes'];
+								break;
+							case 'attributes':
+								return ['name','type'];
+								break;
+							case 'type':
+								return ['String','Integer'];
+								break;
+							default:
+								return wordList;
+								break;
+						}
+						break;
+					}
+				}
+			}
+			return wordList;
 		}
 	},
 	watch: {

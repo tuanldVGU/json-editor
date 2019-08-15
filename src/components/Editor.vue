@@ -63,16 +63,14 @@ export default {
 				View_mode: true,
 				Autocomplete: true,
 			},
-			defaultJSON: [{
-				homepage: "https://www.google.com/",
-				thanks: 'you\'re welcome',
-				task: ["Input","OutLine","Menu"],
-				config: {
-					data: 'test',
-					color: '#f07818',
-					isFinished: true,
+			defaultJSON: [
+				{
+					class: "test"
+				},
+				{
+					association: "test_link"
 				}
-			}]
+			]
 		}
 	},
 	components: {
