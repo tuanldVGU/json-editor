@@ -1,0 +1,10 @@
+[{
+  "homepage": "https://www.google.com/",
+  "thanks": "you\'re welcome",
+  "task": ["Input","OutLine","Menu"],
+  "config": {
+    "data": "test",
+    "color": "#f07818",
+    "isFinished": true
+  }
+}]
