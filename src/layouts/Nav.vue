@@ -5,15 +5,16 @@
                 <span class="border">Json</span> <span class="underline">E</span> ditor
             </a>
         </div>
-        <div class="navbar-menu">
+        <a role="button" class="navbar-burger" data-target="navMenu" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="navbar-menu is-active" id="navMenu">
             <div class="navbar-start">
                 <a class="navbar-item">Home</a>
                 <a class="navbar-item" @click="openAbout()">About</a>
             </div>
-            <div class="navbar-end">
-                <div class="navbar-item">
-                </div> 
-            </div> 
         </div>
     </nav>
 </template>
