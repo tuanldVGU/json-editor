@@ -8,6 +8,9 @@
 					<button class="menu-btn">
 							<span class="icon" title="Compact JSON data, remove all whitespaces." @click="compact()"><i class="far fa-file-archive"></i></span>
 					</button>
+					<button class="menu-btn">
+							<span class="icon" title="Syntax check." @click="checkSyntax()"><i class="fas fa-clipboard-check"></i></span>
+					</button>
 				</div>
 				<div class="dropdown is-right is-hoverable">
 					<div class="dropdown-trigger">
@@ -30,6 +33,7 @@
 <script>
 import _ from 'lodash';
 import { eventBus } from '../../main.js';
+import axios from 'axios';
 
 var ace = require('brace');
 var util = require('../common_assets/util.js');
@@ -70,6 +74,9 @@ export default {
 		updateInput: function(val){
 			this.textData = JSON.stringify(val,undefined,4);
 			this.editor.setValue(this.textData,-1);
+		},
+		getValue: function(){
+			return this.editor.getValue();
 		},
 		setOptions: function(){
 			var me = this;
@@ -178,6 +185,17 @@ export default {
 				}
 			}
 			return wordList;
+		},
+		checkSyntax: function(){
+			let pkg = this.getValue();
+			axios
+				.put('/api/checkDM',{data: pkg})
+				.then(response => {
+						alert(response.data);
+          }, response => {
+						// error callback
+						console.log(response);
+					})
 		}
 	},
 	watch: {
