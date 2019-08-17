@@ -186,7 +186,6 @@ function checkUniqueness(map,json){
         j++;
       }
     } catch (err) {
-      console.log(err);
       out.push(err);
     }
     return (out.length <1);
