@@ -1,13 +1,10 @@
 // Variable
 
 const http = require('http'); //HTTP Protocol
-const express = require('express'); //Express Framework
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
-// const ejs = require('ejs');
-// const session = require('express-session');
-// const ejsmate = require('ejs-mate');
+var express = require('express'); //Express Framework
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
 
 var app = express();
 

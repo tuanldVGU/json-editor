@@ -191,7 +191,7 @@ export default {
 			axios
 				.put('/api/checkDM',{data: pkg})
 				.then(response => {
-						alert(response.data);
+						console.log(response.data);
           }, response => {
 						// error callback
 						console.log(response);
