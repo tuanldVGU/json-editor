@@ -1,11 +1,11 @@
 <template>
   <div id="about-modal" class="modal">
     <div class="modal-background" @click="closeAbout()"></div>
-    <div class="modal-content">
-      <div class="columns aboutme">
+    <div class="modal-content aboutme">
+      <div class="columns">
         <div class="column is-one-quarter avatar-area">
           <figure class="image">
-            <img :src="require('../../static/avatar.jpg')">
+            <img src="https://i.ibb.co/HxLR3yX/avatar.jpg" alt="avatar" border="0" />
           </figure>
           <h4 class="title is-5">Lu Dinh Tuan</h4>
           <h5 class="subtitle is-6">B.Sc Computer Science 2015-2019</h5>
@@ -15,10 +15,10 @@
           <h5 class="subtitle">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer ex velit, viverra non vulputate vitae, blandit vitae nisl. Nullam fermentum orci et erat viverra bibendum.</h5>
           <div class="level">
             <div class="level-item has-text-centered">
-              <figure class="image is-128x64"><img :src="require('../../static/vgu.png')"></figure>
+              <figure class="image is-128x64"><img src="https://i.ibb.co/Q6gTZ2R/vgu.png" alt="vgu" border="0" /></figure>
             </div>
             <div class="level-item has-text-centered">
-              <figure class="image is-128x64"><img :src="require('../../static/fuas.png')"></figure>
+              <figure class="image is-128x64"><img src="https://i.ibb.co/7kVLfCZ/fuas.png" alt="fuas" border="0" /></figure>
             </div>
           </div>
         </div>
