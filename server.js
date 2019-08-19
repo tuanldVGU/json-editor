@@ -30,6 +30,7 @@ app.put("/api/checkDM", function(req,res){
     JSON.parse(json_string);
     let err = dm_vaidate.formatValidate(json_string);
     if (err.length < 1) res.send(true);
+    else res.send(false);
   } catch (err){
     res.send(false);
   }
