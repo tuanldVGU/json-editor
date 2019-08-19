@@ -12,11 +12,11 @@
     "watch": "sass --watch scss/index.scss:src/assets/css/style.css --style compressed"
   },
   "dependencies": {
-    "bulma": "^0.7.5",
-    "vue": "^2.5.11",
     "body-parser": "^1.19.0",
+    "bulma": "^0.7.5",
     "cookie-parser": "^1.4.4",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "vue": "^2.5.11"
   },
   "browserslist": [
     "> 1%",
