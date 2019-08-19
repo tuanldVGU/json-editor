@@ -4,7 +4,6 @@
   "version": "1.0.0",
   "author": "Tuan, Lu Dinh",
   "license": "MIT",
-  "private": true,
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -13,7 +12,10 @@
     "watch": "sass --watch scss/index.scss:src/assets/css/style.css --style compressed"
   },
   "dependencies": {
+    "body-parser": "^1.19.0",
     "bulma": "^0.7.5",
+    "cookie-parser": "^1.4.4",
+    "express": "^4.17.1",
     "vue": "^2.5.11"
   },
   "browserslist": [
@@ -28,12 +30,9 @@
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "babel-preset-env": "^1.6.0",
     "babel-preset-stage-3": "^6.24.1",
-    "body-parser": "^1.19.0",
     "brace": "^0.11.1",
-    "cookie-parser": "^1.4.4",
     "cross-env": "^5.0.5",
     "css-loader": "^3.0.0",
-    "express": "^4.17.1",
     "file-loader": "^1.1.4",
     "lodash": "4.17.14",
     "mem": ">=4.0.0",
@@ -44,8 +43,5 @@
     "vue-template-compiler": "^2.4.4",
     "webpack": "^3.6.0",
     "webpack-dev-server": "^2.9.1"
-  },
-  "engines": {
-    "node": "12.x"
   }
 }
