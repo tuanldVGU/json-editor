@@ -79,7 +79,7 @@ exports.formatValidate = function (json_string){
         pos = getPos(map,location);
         if (!fields.includes('class') && !fields.includes('association') ) throw (errorMes(pos,error.general.invalid_element,'error'));
         else if (fields.includes('class') && !(fields.includes('super') || fields.includes('attributes'))) throw (errorMes(pos,error.general.class_pair,'error'));
-        else if (fields.includes('association') && !(fields.includes('ends') || fields.includes('classes'))) throw (errorMes(pos,error.general.association_pair,'error'));
+        else if (fields.includes('association') && !(fields.includes('ends') && fields.includes('classes'))) throw (errorMes(pos,error.general.association_pair,'error'));
       } catch (err) {
         out.push(err);
       }
