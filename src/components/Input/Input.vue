@@ -8,15 +8,12 @@
 					<button class="menu-btn">
 							<span class="icon" title="Compact JSON data, remove all whitespaces." @click="compact()"><i class="far fa-file-archive"></i></span>
 					</button>
-					<button class="menu-btn">
-							<span class="icon" title="Syntax check." @click="checkSyntax()"><i class="fas fa-clipboard-check"></i></span>
-					</button>
 				</div>
 				<div class="dropdown is-right is-hoverable">
 					<div class="dropdown-trigger">
 						<button class="menu-btn"><span class="icon" v-html="has_error"></span></button>
 					</div>
-					<div class="dropdown-menu" role="menu" v-show="error.line">
+					<div id="input_error" class="dropdown-menu" role="menu" v-show="error.line">
 						<div class="dropdown-content">
 							<div class="dropdown-item">
 								Line {{error.line}} has error: {{error.msg}}

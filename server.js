@@ -2,6 +2,7 @@
 
 const http = require("http"); //HTTP Protocol
 var express = require("express"); //Express Framework
+var cors = require("cors"); // Enable CORS Requests 
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser");
@@ -23,7 +24,7 @@ app.get("/", function(req, res) {
   res.sendFile(path.join(__dirname + "/index.html"));
 });
 
-app.put("/api/checkDM", function(req,res){
+app.put("/api/checkDM", cors(), function(req,res){
   const json_string = req.body.data;
   let dm_vaidate = require("./src/assets/js/customValidate");
   try {
