@@ -14,8 +14,12 @@
 					<span class="icon"><i class="fas fa-file-upload"></i></span> Load
 				</label>
 
-				<a class="navbar-item" title="Save" @click="saveFile()">
+				<a class="navbar-item" title="Save" @click="exportJSON()">
 					<span class="icon"><i class="fas fa-save"></i></span><p> Save</p>
+				</a>
+
+				<a class="navbar-item" title="Export to SQL" @click="exportSQL()">
+					<span class="icon"><i class="fas fa-save"></i></span><p> Export</p>
 				</a>
 
 				<div class="navbar-item filename">
@@ -44,13 +48,13 @@
 import { eventBus } from '../../main.js';
 
 var util = require('../common_assets/util.js');
+var exporter = require('../../assets/js/exportDM.js');
 var defaultName = 'index.json';
 
 export default {
 	name: 'menu-component',
 	props: {
-		'json_data': {
-			default: this.default_json
+		json_data: {
 		}
 	},
 	data () {
@@ -85,24 +89,36 @@ export default {
 				reader.readAsText(f);
 			}
 		},
-		saveFile: function (){
-			var me = this;
+		saveFile: function (data,file_name){
 			var element = document.createElement('a');
 
-			var data = document.getElementById('input').innerText.split('\n');
-			data.splice(0,data.length/2);
-			var jsonString = data.join('\n');
-			var file = new Blob([jsonString],{type:"octet/stream"})
+			var file = new Blob([data],{type:"octet/stream"})
 
-			element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonString));
+			element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
 
-			element.setAttribute('download', me.fileName);
+			element.setAttribute('download', file_name);
 
 			element.style.display = 'none';
 			document.body.appendChild(element);
 
 			element.click();
 			document.body.removeChild(element);
+		},
+		exportJSON: function(){
+			let is_error = document.getElementById('input_error');
+  		if (is_error.style.display == "none"){
+				let jsonString =JSON.stringify(this.json_data,undefined,4);
+				let file_name = this.fileName;
+				this.saveFile(jsonString,file_name);
+			} else alert('Please fix all the error.');
+		},
+		exportSQL: function (){
+			let is_error = document.getElementById('input_error');
+  		if (is_error.style.display == "none"){
+				let file_name = this.fileName.split('.')[0] + '.sql';
+				let data = exporter.toSQL(this.json_data);
+				this.saveFile(data,file_name);
+			} else alert('Please fix all the error.');
 		},
 		openConfig: function(){
 			util.openModal('config-modal');

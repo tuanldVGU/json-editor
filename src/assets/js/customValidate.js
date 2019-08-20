@@ -7,7 +7,7 @@ var error = {
     invalid_root: "Input JSON must be array.",
     invalid_element: "Element must be a class or association.",
     class_pair: "Class should includes attributes or super.",
-    association_pair: "Association should includes ends or classes.",
+    association_pair: "Association should includes ends and classes.",
     invalid_key: "is an undefined key."
   },
   properties: {
@@ -79,7 +79,7 @@ exports.formatValidate = function (json_string){
         pos = getPos(map,location);
         if (!fields.includes('class') && !fields.includes('association') ) throw (errorMes(pos,error.general.invalid_element,'error'));
         else if (fields.includes('class') && !(fields.includes('super') || fields.includes('attributes'))) throw (errorMes(pos,error.general.class_pair,'error'));
-        else if (fields.includes('association') && !fields.includes('ends')) throw (errorMes(pos,error.general.association_pair,'error'));
+        else if (fields.includes('association') && !(fields.includes('ends') || fields.includes('classes'))) throw (errorMes(pos,error.general.association_pair,'error'));
       } catch (err) {
         out.push(err);
       }
