@@ -159,7 +159,7 @@ function checkUniqueness(map,json){
             break;
           case 'ends':
             if (value instanceof Array)  {
-              if (value.length != 2) throw (errorMes(pos,error.properties.invalid_ends.length,'error'));
+              if (value.length != 2) { throw (errorMes(pos,error.properties.invalid_ends.length,'error')); }
               if (element['classes']){
                 let x = 0;
                 for (var item of element['classes']){
@@ -167,6 +167,7 @@ function checkUniqueness(map,json){
                     location.push(x);
                     pos = getPos(map,location);
                     // unique ends
+                    if (class_association_name[item] == undefined) break;
                     class_association_name[item].push(UniqueIn(element['ends'][x],'ends',class_association_name[item],pos));
                   x++;
                 }
@@ -175,8 +176,8 @@ function checkUniqueness(map,json){
             break;
           case 'classes':
             if (value instanceof Array)  {
-              if (value.length != 2) throw (errorMes(pos,error.properties.invalid_classes.length,'error'));
-              for (var item of value ){
+              if (value.length != 2){ throw (errorMes(pos,error.properties.invalid_classes.length,'error'));}
+              for (var item of value){
                 // class is not declared
                 if (!className.includes(item)) throw (errorMes(pos,error.properties.invalid_classes.content(item),'error'));
               }
@@ -186,6 +187,7 @@ function checkUniqueness(map,json){
         j++;
       }
     } catch (err) {
+      console.log(err);
       out.push(err);
     }
     return (out.length <1);

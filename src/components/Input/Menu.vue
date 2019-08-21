@@ -19,7 +19,7 @@
 				</a>
 
 				<a class="navbar-item" title="Export to SQL" @click="exportSQL()">
-					<span class="icon"><i class="fas fa-save"></i></span><p> Export</p>
+					<span class="icon"><i class="fas fa-file-export"></i></span><p> Export</p>
 				</a>
 
 				<div class="navbar-item filename">

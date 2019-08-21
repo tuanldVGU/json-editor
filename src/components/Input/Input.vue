@@ -43,6 +43,12 @@ require('brace/ext/language_tools');
 var error = '<i class="fas fa-exclamation-triangle"></i>';
 var no_error  = '<i class="fas fa-check-circle"></i>';
 var debounce_interval = 500;
+
+var semantic_format = {
+	class: "\"class\": \"\", \"attributes\" : []",
+	association: "\"association\": \"\",\"ends\" : [],\"classes\" : []",
+	attributes_obj: "\"name\": \"\",\"type\" : \"\""
+}
 export default {
   	name: 'input-component',
 	data: function(){
@@ -101,17 +107,30 @@ export default {
 					}));
 				}
 			}
+			let formatWordCompleter = {
+				getCompletions: function(editor, session, pos, prefix, callback) {
+					var wordList = me.getFormList();
+					callback(null, wordList.map(function(word) {
+						return {
+							caption: word,
+							value: semantic_format[word],
+							meta: "format"
+						};
+					}));
+				}
+			}
 			this.editor.setOptions({
 				enableBasicAutocompletion: me.options.Autocomplete,
 				// enableSnippets: true,
 				enableLiveAutocompletion: true
 			});
 			langTools.setCompleters([staticWordCompleter]);
+			langTools.addCompleter(formatWordCompleter);
 		},
 		setEvents: function(){
 			var me = this;
 			this.editor.on('change',_.debounce(function(e){
-				if (e.lines[0] == "\"\""){
+				if (e.lines[0] == "\"\"" || e.lines[0] == "{" ){
 					me.editor.commands.byName.startAutocomplete.exec(me.editor);
 				};
 				let val = me.editor.getValue();
@@ -182,6 +201,28 @@ export default {
 				}
 			}
 			return wordList;
+		},
+		getFormList: function(){
+			let wordList = ['class','association','attributes'];
+			let caretPos = this.editor.getCursorPosition();
+			for (var row = caretPos.row; row >0; row--){
+				let inElement = this.editor.session.getLine(row).replace(/\s/g,'');
+				inElement = inElement.split("\"");
+				for (var i=(inElement.length-1); i>0; i--){
+					if (wordList.includes(inElement[i])){
+						switch (inElement[i]){
+							case 'attributes':
+								return ['attributes_obj'];
+								break;
+							default:
+								return [];
+								break;
+						}
+						break;
+					}
+				}
+			}
+			return ['class','association'];
 		},
 		checkSyntax: function(){
 			let pkg = this.getValue();
