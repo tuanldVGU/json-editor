@@ -11,7 +11,7 @@ exports.toSQL = function (json){
 }
 
 function classTable (obj){
-  let output = "CREATE TABLE " + obj['class'] + " (\n\t" + obj['class'] + "_id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY";
+  let output = "CREATE TABLE " + obj['class'] + " (\n\t" + obj['class'] + "_id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY";
   let fk = [];
   obj['attributes'].forEach(element => {
     let type = "";
@@ -54,10 +54,10 @@ function addClassAttribute(class_name,name,type){
 
 function associationTable(obj){
   return "CREATE TABLE " + obj['association'] + 
-        " (\n\t" + obj['ends'][0] + " INT,\n\t"
-        + obj['ends'][1] + " INT, \n"+
-        "\tCONSTRAINT fk_"+ obj['classes'][0] + "_" + obj['ends'][0] + " FOREIGN KEY (" +  obj['ends'][0] + ")\n"+
-        "\tREFERENCES "+ obj['classes'][0] +"("+  obj['classes'][0] +"_id), \n" +
-        "\tCONSTRAINT fk_"+ obj['classes'][1] + "_" + obj['ends'][1] + " FOREIGN KEY (" +  obj['ends'][1] + ")\n"+
-        "\tREFERENCES "+ obj['classes'][1] +"("+  obj['classes'][1] +"_id)\n) ENGINE=InnoDB;";
+        " (\n\t" + obj['ends'][0] + " INT(11),\n\t"
+        + obj['ends'][1] + " INT(11), \n"+
+        "\tCONSTRAINT fk_"+ obj['classes'][1] + "_" + obj['ends'][0] + " FOREIGN KEY (" +  obj['ends'][0] + ")\n"+
+        "\tREFERENCES "+ obj['classes'][1] +"("+  obj['classes'][1] +"_id), \n" +
+        "\tCONSTRAINT fk_"+ obj['classes'][0] + "_" + obj['ends'][1] + " FOREIGN KEY (" +  obj['ends'][1] + ")\n"+
+        "\tREFERENCES "+ obj['classes'][0] +"("+  obj['classes'][0] +"_id)\n) ENGINE=InnoDB;";
 }

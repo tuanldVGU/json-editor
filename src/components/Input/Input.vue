@@ -96,12 +96,13 @@ export default {
 					var wordList = me.getAutocompleteList();
 					callback(null, wordList.map(function(word) {
 						// auto close "" if users not already do it
-						let close = '';
+						let close = ''; let start = '';
 						let line = session.getLine(pos.row);
 						if (line.charAt(pos.column) != "\"" && line.charAt(pos.column-prefix.length-1) == "\"") close = "\"";
+						if (line.charAt(pos.column) == " " && line.charAt(pos.column-prefix.length-1) == " ") { start = "\""; close = "\""; } 
 						return {
 							caption: word,
-							value: word+close,
+							value: start+word+close,
 							meta: "static"
 						};
 					}));
@@ -111,9 +112,15 @@ export default {
 				getCompletions: function(editor, session, pos, prefix, callback) {
 					var wordList = me.getFormList();
 					callback(null, wordList.map(function(word) {
+						// auto close {} if users not already do it
+						let close = ''; let start = '';
+						let line = session.getLine(pos.row);
+						console.log(line.charAt(pos.column),line.charAt(pos.column-prefix.length-1));
+						if (line.charAt(pos.column) != "}" && line.charAt(pos.column-prefix.length-1) == "{") close = "}";
+						if (line.charAt(pos.column) != "}" && line.charAt(pos.column-prefix.length-1) != "{") { start = "{"; close = "}"; }
 						return {
 							caption: word,
-							value: semantic_format[word],
+							value: start+semantic_format[word]+close,
 							meta: "format"
 						};
 					}));
@@ -130,7 +137,7 @@ export default {
 		setEvents: function(){
 			var me = this;
 			this.editor.on('change',_.debounce(function(e){
-				if (e.lines[0] == "\"\"" || e.lines[0] == "{" ){
+				if (e.lines[0] == "\"\"" || e.lines[0] == "{" ||  e.lines[0] == "{}"){
 					me.editor.commands.byName.startAutocomplete.exec(me.editor);
 				};
 				let val = me.editor.getValue();

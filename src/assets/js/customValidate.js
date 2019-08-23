@@ -161,7 +161,7 @@ function checkUniqueness(map,json){
             if (value instanceof Array)  {
               if (value.length != 2) { throw (errorMes(pos,error.properties.invalid_ends.length,'error')); }
               if (element['classes']){
-                let x = 0;
+                let x = 1;
                 for (var item of element['classes']){
                   // class is not declared
                     location.push(x);
@@ -169,7 +169,7 @@ function checkUniqueness(map,json){
                     // unique ends
                     if (class_association_name[item] == undefined) break;
                     class_association_name[item].push(UniqueIn(element['ends'][x],'ends',class_association_name[item],pos));
-                  x++;
+                  x = 0;
                 }
               }
             } else throw (errorMes(pos,error.properties.invalid_ends.type,'error'));
