@@ -19,6 +19,13 @@ app.use(cookieParser());
 //public folder
 app.use(express.static(path.join(__dirname,"")));
 
+//Cors 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 // Routing
 app.get("/", function(req, res) {
   res.sendFile(path.join(__dirname + "/index.html"));

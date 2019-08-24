@@ -47,7 +47,7 @@ var debounce_interval = 500;
 var semantic_format = {
 	class: "\"class\": \"\", \"attributes\" : []",
 	association: "\"association\": \"\",\"ends\" : [],\"classes\" : []",
-	attributes_obj: "\"name\": \"\",\"type\" : \"\""
+	type_name: "\"name\": \"\",\"type\" : \"\""
 }
 export default {
   	name: 'input-component',
@@ -99,7 +99,7 @@ export default {
 						let close = ''; let start = '';
 						let line = session.getLine(pos.row);
 						if (line.charAt(pos.column) != "\"" && line.charAt(pos.column-prefix.length-1) == "\"") close = "\"";
-						if (line.charAt(pos.column) == " " && line.charAt(pos.column-prefix.length-1) == " ") { start = "\""; close = "\""; } 
+						if (line.charAt(pos.column) != "\"" && line.charAt(pos.column-prefix.length-1) != "\"") { start = "\""; close = "\""; } 
 						return {
 							caption: word,
 							value: start+word+close,
@@ -115,13 +115,15 @@ export default {
 						// auto close {} if users not already do it
 						let close = ''; let start = '';
 						let line = session.getLine(pos.row);
-						console.log(line.charAt(pos.column),line.charAt(pos.column-prefix.length-1));
 						if (line.charAt(pos.column) != "}" && line.charAt(pos.column-prefix.length-1) == "{") close = "}";
 						if (line.charAt(pos.column) != "}" && line.charAt(pos.column-prefix.length-1) != "{") { start = "{"; close = "}"; }
 						return {
 							caption: word,
 							value: start+semantic_format[word]+close,
-							meta: "format"
+							meta: "format",
+							completer: function(editor,data){
+								console.log(data.value);
+							}
 						};
 					}));
 				}
@@ -181,9 +183,12 @@ export default {
 		getAutocompleteList: function(){
 			let wordList = ['class','association','super','ends','attributes','name','type','classes'];
 			let caretPos = this.editor.getCursorPosition();
+			let isClose = false;
 			for (var row = caretPos.row; row >0; row--){
 				let inElement = this.editor.session.getLine(row).replace(/\s/g,'');
 				inElement = inElement.split("\"");
+				if (isClose) { isClose = false; continue; } 
+				if (inElement[0]=='},') isClose = true;
 				for (var i=(inElement.length-1); i>0; i--){
 					if (wordList.includes(inElement[i])){
 						switch (inElement[i]){
@@ -200,26 +205,30 @@ export default {
 								return ['String','Integer'];
 								break;
 							default:
-								return wordList;
+								return [];
 								break;
 						}
 						break;
 					}
 				}
 			}
-			return wordList;
+			return ['class','association'];
 		},
 		getFormList: function(){
 			let wordList = ['class','association','attributes'];
 			let caretPos = this.editor.getCursorPosition();
+			let isClose = false;
 			for (var row = caretPos.row; row >0; row--){
 				let inElement = this.editor.session.getLine(row).replace(/\s/g,'');
 				inElement = inElement.split("\"");
+				console.log(row,isClose);
+				if (isClose) { isClose = false; continue; }  
+				if (inElement[0]=='},') isClose = true;
 				for (var i=(inElement.length-1); i>0; i--){
 					if (wordList.includes(inElement[i])){
 						switch (inElement[i]){
 							case 'attributes':
-								return ['attributes_obj'];
+								return ['type_name'];
 								break;
 							default:
 								return [];
