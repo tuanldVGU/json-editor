@@ -8,6 +8,9 @@
 					<button class="menu-btn">
 							<span class="icon" title="Compact JSON data, remove all whitespaces." @click="compact()"><i class="far fa-file-archive"></i></span>
 					</button>
+					<button class="menu-btn">
+							<span class="icon" title="Compact JSON data, remove all whitespaces." @click="checkSyntax()"><i class="far fa-file-archive"></i></span>
+					</button>
 				</div>
 				<div class="dropdown is-right is-hoverable">
 					<div class="dropdown-trigger">

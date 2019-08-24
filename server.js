@@ -19,22 +19,31 @@ app.use(cookieParser());
 //public folder
 app.use(express.static(path.join(__dirname,"")));
 
+// Cors
+corsOptions = {
+    origin: 'https://json-editor-for-security-model.herokuapp.com',
+    credentials: true
+}
+
 // Routing
 app.get("/", function(req, res,next) {
   res.sendFile(path.join(__dirname + "/index.html"));
 });
 
-app.put("/api/checkDM",cors({
-  origin: 'https://json-editor-for-security-model.herokuapp.com'
-  }), function(req,res,next){
+app.options("/api/checkDM", cors(corsOptions));
+
+app.put("/api/checkDM",cors(corsOptions), function(req,res,next){
   const json_string = req.body.data;
   let dm_vaidate = require("./src/assets/js/customValidate");
   try {
+    console.log(req.body);
     JSON.parse(json_string);
     let err = dm_vaidate.formatValidate(json_string);
+    console.log(err);
     if (err.length < 1) res.send(true);
     else res.send(false);
   } catch (err){
+    console.log(err);
     res.send(false);
   }
 });
