@@ -135,3 +135,13 @@ input {
     text-align: left;
   }
 }
+
+#saveModal {
+  .modal-content{
+    text-align: left;
+    background: #fff;
+    padding: 20px;
+    width: 450px;
+    border-radius: 4px;
+  }
+}

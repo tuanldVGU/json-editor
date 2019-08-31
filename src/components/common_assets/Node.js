@@ -51,13 +51,17 @@ Node.prototype.setValue = function(value) {
         // reuse existing child
         if (i < this.childs.length) {
           child = value[i];
-
           child.fieldEditable = false;
           child.index = i;
           child.setValue(childValue);
         } else { // leaf node
+          var wow = i;
+          if (typeof childValue == 'object') {
+            if (childValue.hasOwnProperty('class')) wow = 'Class';
+            if (childValue.hasOwnProperty('association')) wow = 'Association';
+          }
           child = new Node({
-            field: i,
+            field: wow,
             value: childValue,
             fieldEditable: false,
             level: this.level + 1
@@ -210,6 +214,7 @@ Node.prototype.findChildByProperty = function() {
 Node.prototype.getMaxVisibleChilds = function (){
   return DEFAULT_MAX_VISIBLE_CHILDS;
  };
+
 /************************************
  * Node child handling
  ************************************/

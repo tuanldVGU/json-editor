@@ -36,14 +36,11 @@ app.put("/api/checkDM",cors(corsOptions), function(req,res,next){
   const json_string = req.body.data;
   let dm_vaidate = require("./src/assets/js/customValidate");
   try {
-    console.log(req.body);
     JSON.parse(json_string);
     let err = dm_vaidate.formatValidate(json_string);
-    console.log(err);
     if (err.length < 1) res.send(true);
     else res.send(false);
   } catch (err){
-    console.log(err);
     res.send(false);
   }
 });

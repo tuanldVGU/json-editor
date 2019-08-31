@@ -8,9 +8,6 @@
 					<button class="menu-btn">
 							<span class="icon" title="Compact JSON data, remove all whitespaces." @click="compact()"><i class="far fa-file-archive"></i></span>
 					</button>
-					<button class="menu-btn">
-							<span class="icon" title="Compact JSON data, remove all whitespaces." @click="checkSyntax()"><i class="far fa-file-archive"></i></span>
-					</button>
 				</div>
 				<div class="dropdown is-right is-hoverable">
 					<div class="dropdown-trigger">
@@ -51,6 +48,12 @@ var semantic_format = {
 	class: "\"class\": \"\", \"attributes\" : []",
 	association: "\"association\": \"\",\"ends\" : [],\"classes\" : []",
 	type_name: "\"name\": \"\",\"type\" : \"\""
+}
+
+var semantic_format_afteCursor = {
+	class: 10,
+	association: 16,
+	type_name: 9
 }
 export default {
   	name: 'input-component',
@@ -124,8 +127,12 @@ export default {
 							caption: word,
 							value: start+semantic_format[word]+close,
 							meta: "format",
-							completer: function(editor,data){
-								console.log(data.value);
+							completer: {
+								insertMatch: function(editor,data){
+									let pos = editor.selection.getCursor();
+									editor.completer.insertMatch({value: data.value});
+									editor.gotoLine(pos.row + 1, pos.column + semantic_format_afteCursor[word]);
+								}
 							}
 						};
 					}));
@@ -138,6 +145,29 @@ export default {
 			});
 			langTools.setCompleters([staticWordCompleter]);
 			langTools.addCompleter(formatWordCompleter);
+			this.editor.commands.addCommand({
+				name: "nextItem",
+				bindKey: {win: "Tab",mac: "Tab"},
+				exec: function(editor) {
+					let pos = editor.getCursorPosition();
+					let before = editor.session.getLines(0,pos.row-1).join('');
+					before += editor.session.getLine(pos.row).substring(0,pos.column);
+					if ( (before.match(/"/g) || []).length %2 != 0 ){
+						let check = editor.session.getLine(pos.row).substr(pos.column);
+						let count = 0;
+						for (var i =0; i< check.length; i++){
+							if (check.charAt(i) == "\"") count++;
+							if ((count == 3) || check.charAt(i) == ']') {
+								editor.gotoLine(pos.row+1,pos.column+i);
+								break;
+							}
+						}
+						if (count != 3) editor.indent();
+					} else { editor.indent(); }
+				},
+				multiSelectAction: "forEach",
+				scrollIntoView: "selectionPart"
+			});
 		},
 		setEvents: function(){
 			var me = this;
@@ -186,14 +216,17 @@ export default {
 		getAutocompleteList: function(){
 			let wordList = ['class','association','super','ends','attributes','name','type','classes'];
 			let caretPos = this.editor.getCursorPosition();
-			let isClose = false;
+			let isClose = 0;
 			for (var row = caretPos.row; row >0; row--){
-				let inElement = this.editor.session.getLine(row).replace(/\s/g,'');
+				let inElement = this.editor.session.getLine(row);
+				if (row == caretPos.row) inElement = inElement.substr(0,caretPos.column);
+				inElement.replace(/\s/g,'');
 				inElement = inElement.split("\"");
-				if (isClose) { isClose = false; continue; } 
-				if (inElement[0]=='},') isClose = true;
-				for (var i=(inElement.length-1); i>0; i--){
-					if (wordList.includes(inElement[i])){
+				if (row == caretPos.row && inElement.length >= 2 &&inElement[(inElement.length-2)].includes(':')) return [];
+				for (var i=(inElement.length-1); i>=0; i--){
+					if (inElement[i].includes('}') || inElement[i].includes('{') ) isClose = this.bracket_count(inElement[i],isClose);
+					if (isClose > 0) continue; 
+					if (wordList.includes(inElement[i]) && inElement[i+1] != ''){
 						switch (inElement[i]){
 							case 'class':
 								return ['attributes','super'];
@@ -220,15 +253,16 @@ export default {
 		getFormList: function(){
 			let wordList = ['class','association','attributes'];
 			let caretPos = this.editor.getCursorPosition();
-			let isClose = false;
-			for (var row = caretPos.row; row >0; row--){
-				let inElement = this.editor.session.getLine(row).replace(/\s/g,'');
+			let isClose = 0;
+			for (var row = caretPos.row; row > 0; row--){
+				let inElement = this.editor.session.getLine(row);
+				if (row == caretPos.row) inElement = inElement.substr(0,caretPos.column);
+				inElement.replace(/\s/g,'');
 				inElement = inElement.split("\"");
-				console.log(row,isClose);
-				if (isClose) { isClose = false; continue; }  
-				if (inElement[0]=='},') isClose = true;
-				for (var i=(inElement.length-1); i>0; i--){
-					if (wordList.includes(inElement[i])){
+				for (var i=(inElement.length-1); i>=0; i--){
+					if (inElement[i].includes('}') || inElement[i].includes('{') ) isClose = this.bracket_count(inElement[i],isClose);
+					if (isClose > 0) 	continue; 
+					if (wordList.includes(inElement[i]) && inElement[i+1] != ''){
 						switch (inElement[i]){
 							case 'attributes':
 								return ['type_name'];
@@ -253,6 +287,15 @@ export default {
 						// error callback
 						console.log(response);
 					})
+		},
+		bracket_count: function(str,count){
+			let caretPos = this.editor.getCursorPosition();
+			let start = str.length-1;
+			for (var i= start; i>=0; i--){
+				if (str[i] == '{' && count >0) count--;
+				if (str[i] == '}') count++;
+			}
+			return count;
 		}
 	},
 	watch: {

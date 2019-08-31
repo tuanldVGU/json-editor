@@ -24,7 +24,7 @@
 
 				<div class="navbar-item filename">
 					<div class="name-input">
-						{{fileName}}
+						{{fileName}}.json
 					</div>
 					<span class="icon close-btn" @click="newFile()">
 						<i class="fas fa-times-circle"></i>
@@ -41,6 +41,26 @@
 				</div>
 			</div>
 		</div>
+		<div class="modal" id="saveModal">
+			<div class="modal-background"></div>
+			<div class="modal-content">
+				<label class="label">Save as</label>
+				<div class="field has-addons">
+					<div class="control is-expanded">
+						<input class="input" type="text" placeholder="Text input" v-model="fileName">
+					</div>
+					<p class="control">
+						<a class="button is-static">
+							{{fileExt}}
+						</a>
+					</p>
+					<div class="control">
+						<a class="button is-primary" id="saveLink" :download="fileName+fileExt" @click="closeSaveModal()">Save</a>
+					</div>
+				</div>
+			</div>
+			<button class="modal-close is-large" aria-label="close" @click="closeSaveModal()"></button>
+		</div>
 	</nav>
 </template>
 
@@ -49,7 +69,7 @@ import { eventBus } from '../../main.js';
 
 var util = require('../common_assets/util.js');
 var exporter = require('../../assets/js/exportDM.js');
-var defaultName = 'index.json';
+var defaultName = 'index';
 
 export default {
 	name: 'menu-component',
@@ -59,7 +79,8 @@ export default {
 	},
 	data () {
 		return {
-			fileName: defaultName
+			fileName: defaultName,
+			fileExt: '.json'
 		}
 	},
 	methods: {
@@ -78,7 +99,7 @@ export default {
 						try {
 							var json = JSON.parse(e.target.result);
 							me.emitToEditor(json);
-							me.fileName = file.name;
+							me.fileName = file.name.split('.')[0];
 							console.log('Result: '+JSON.stringify(json)); 
 						} catch (err){
 							console.error('JSON file has some errors:',err);
@@ -89,35 +110,28 @@ export default {
 				reader.readAsText(f);
 			}
 		},
-		saveFile: function (data,file_name){
-			var element = document.createElement('a');
+		saveFile: function (data,file_ext){
+			this.fileExt = file_ext;
+			var element = document.getElementById('saveLink');
 
 			var file = new Blob([data],{type:"octet/stream"})
 
 			element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
 
-			element.setAttribute('download', file_name);
-
-			element.style.display = 'none';
-			document.body.appendChild(element);
-
-			element.click();
-			document.body.removeChild(element);
+			document.getElementById('saveModal').classList.add('is-active');
 		},
 		exportJSON: function(){
 			let is_error = document.getElementById('input_error');
   		if (is_error.style.display == "none"){
 				let jsonString =JSON.stringify(this.json_data,undefined,4);
-				let file_name = this.fileName;
-				this.saveFile(jsonString,file_name);
+				this.saveFile(jsonString,'.json');
 			} else alert('Please fix all the error.');
 		},
 		exportSQL: function (){
 			let is_error = document.getElementById('input_error');
   		if (is_error.style.display == "none"){
-				let file_name = this.fileName.split('.')[0] + '.sql';
 				let data = exporter.toSQL(this.json_data);
-				this.saveFile(data,file_name);
+				this.saveFile(data,'.sql');
 			} else alert('Please fix all the error.');
 		},
 		openConfig: function(){
@@ -129,6 +143,9 @@ export default {
 				from: 'menu'
 			}
 			this.$emit('json_onChange', pkg);
+		},
+		closeSaveModal: function(){
+			document.getElementById('saveModal').classList.remove('is-active');
 		}
 	},
 	created() {
