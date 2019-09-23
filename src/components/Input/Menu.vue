@@ -41,6 +41,7 @@
 				</div>
 			</div>
 		</div>
+		<!-- Save modal  -->
 		<div class="modal" id="saveModal">
 			<div class="modal-background"></div>
 			<div class="modal-content">
@@ -55,11 +56,27 @@
 						</a>
 					</p>
 					<div class="control">
-						<a class="button is-primary" id="saveLink" :download="fileName+fileExt" @click="closeSaveModal()">Save</a>
+						<a class="button is-primary" id="saveLink" :download="fileName+fileExt" @click="closeModal('saveModal')">Save</a>
 					</div>
 				</div>
 			</div>
-			<button class="modal-close is-large" aria-label="close" @click="closeSaveModal()"></button>
+			<button class="modal-close is-large" aria-label="close" @click="closeModal('saveModal')"></button>
+		</div>
+		<!-- Newfile modal -->
+		<div class="modal" id="newfileModal">
+			<div class="modal-background"></div>
+			<div class="modal-content">
+				<label class="label">Save the current file before create a new one?</label>
+				<div class="field is-grouped">
+					<div class="control">
+						<a class="button is-secondary" @click="empty()">Continue without save</a>
+					</div>
+					<div class="control">
+						<a class="button is-primary" @click="exportJSON()">Save</a>
+					</div>
+				</div>
+			</div>
+			<button class="modal-close is-large" aria-label="close" @click="closeModal('newfileModal')"></button>
 		</div>
 	</nav>
 </template>
@@ -85,8 +102,12 @@ export default {
 	},
 	methods: {
 		newFile: function(event) {
-			if (this.json_data !== []) this.emitToEditor([]);
+			if (this.json != "" && this.json_data.length > 0) document.getElementById('newfileModal').classList.add('is-active');
+		},
+		empty: function(){
+			this.emitToEditor([]);
 			this.fileName = defaultName;
+			this.closeModal('newfileModal');
 		},
 		loadFile: function(event) {
 			var me = this;
@@ -144,8 +165,8 @@ export default {
 			}
 			this.$emit('json_onChange', pkg);
 		},
-		closeSaveModal: function(){
-			document.getElementById('saveModal').classList.remove('is-active');
+		closeModal: function(id){
+			document.getElementById(id).classList.remove('is-active');
 		}
 	},
 	created() {

@@ -129,9 +129,9 @@ export default {
 							meta: "format",
 							completer: {
 								insertMatch: function(editor,data){
-									let pos = editor.selection.getCursor();
 									editor.completer.insertMatch({value: data.value});
-									editor.gotoLine(pos.row + 1, pos.column + semantic_format_afteCursor[word]);
+									let pos = editor.selection.getCursor();
+									editor.gotoLine(pos.row + 1, pos.column - data.value.length + semantic_format_afteCursor[word]);
 								}
 							}
 						};
@@ -152,17 +152,20 @@ export default {
 					let pos = editor.getCursorPosition();
 					let before = editor.session.getLines(0,pos.row-1).join('');
 					before += editor.session.getLine(pos.row).substring(0,pos.column);
-					if ( (before.match(/"/g) || []).length %2 != 0 ){
+					let isOdd = (before.match(/"/g) || []).length %2 != 0;
+					if ( isOdd || ((before.match(/\[/g) || []).length - (before.match(/\]/g) || []).length > 0)){
 						let check = editor.session.getLine(pos.row).substr(pos.column);
-						let count = 0;
+						let count = 0; let open = false; let exit= false;
 						for (var i =0; i< check.length; i++){
 							if (check.charAt(i) == "\"") count++;
-							if ((count == 3) || check.charAt(i) == ']') {
+							if (check.charAt(i) == "[") open=true;
+							if ((count == 3) || (check.charAt(i) == ']' && open) || (!isOdd && count == 2)) {
 								editor.gotoLine(pos.row+1,pos.column+i);
+								exit=true;
 								break;
 							}
 						}
-						if (count != 3) editor.indent();
+						if (!exit) editor.indent();
 					} else { editor.indent(); }
 				},
 				multiSelectAction: "forEach",
@@ -308,6 +311,9 @@ export default {
 			if (val.msg) this.has_error = error;
 			else this.has_error = no_error;
 			eventBus.$emit('jsonSyntax_error',val);
+		},
+		'options.View_mode': function(val){
+			this.editor.setReadOnly(val);
 		}
 	},
 	created(){

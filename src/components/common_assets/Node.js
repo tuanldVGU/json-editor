@@ -288,31 +288,84 @@ Node.prototype.setNodebyIndex = function(pathIndex,dest,val){
   }
   if (dest == 'val') { child.value = val; } 
   else if (dest == 'field') { child.field = val; }
-  else if (dest == 'new') {
-    if (val == 'child-bool' || val == 'child-str') {
-      let childNode = new Node({
-        field: (child.type == 'array') ? child.childs.length : 'newnode',
-        value: (val == 'child-bool') ? true :'please enter your value',
-        fieldEditable: true,
-        level: child.level + 1
-      });
-      let visible = i < this.getMaxVisibleChilds();
-      child.appendChild(childNode,visible);
-    } else if (val == 'up' || val == 'down') {
-      child = child.parent;
-      let childNode = new Node({
-        field: (child.type == 'array') ? child.childs.length : 'newnode',
-        value: (val == 'child-bool') ? true :'please enter your value',
-        fieldEditable: true,
-        level: child.level + 1
-      });
-      let visible = i < this.getMaxVisibleChilds();
-      let childIndex = parseInt(index[index.length-1],10) + ( val == 'down' ? 1 : 0);
-      child.appendChild(childNode,visible,childIndex);
-    }
-  }
   else if (dest == 'delete') {
-      child.parent.removeChild(child);
+    child.parent.removeChild(child);
+  }
+  else if (dest == 'new'){
+    if (child.type == "auto") child = child.parent;
+    switch (val){
+      case 'child-bool':
+      case 'child-str':
+        let childNode = new Node({
+          field: (child.type == 'array') ? child.childs.length : "newNode",
+          value: (val == 'child-bool') ? true :'please enter your value',
+          fieldEditable: true,
+          level: child.level + 1
+        });
+        let visible = i < this.getMaxVisibleChilds();
+        child.appendChild(childNode,visible);
+        break;
+      case 'class':
+      case 'association':
+          childNode = new Node({
+            field: (val == 'class')? "Class" : "Association",
+            value: {},
+            fieldEditable: true,
+            level: child.level + 1
+          });
+          child.appendChild(childNode,true);
+          let childchild = new Node({
+            field: val,
+            value: "",
+            fieldEditable: true,
+            level: childNode.level + 1
+          });
+          childNode.appendChild(childchild,true);
+        break;
+      case 'type_name':
+          let childPGK = new Node({
+            field:  child.childs.length,
+            value: {},
+            fieldEditable: true,
+            level: child.level + 1
+          });
+          child.appendChild(childPGK,true);
+          childNode = new Node({
+            field: "type",
+            value: "",
+            fieldEditable: true,
+            level: childPGK.level + 1
+          });
+          childPGK.appendChild(childNode,true);
+          childNode = new Node({
+            field: "name",
+            value: "",
+            fieldEditable: true,
+            level: childPGK.level + 2
+          });
+          childPGK.appendChild(childNode,true);
+        break;
+      default: 
+        childNode = new Node({
+          field: val,
+          value: (val == "attributes" || val == "ends" || val == "classes") ? [] : "",
+          fieldEditable: true,
+          level: child.level + 1
+        });
+        child.appendChild(childNode,true);
+    }
+    // if (val == 'up' || val == 'down') {
+    //   child = child.parent;
+    //   let childNode = new Node({
+    //     field: (child.type == 'array') ? child.childs.length : dest,
+    //     value: (val == 'child-bool') ? true :'please enter your value',
+    //     fieldEditable: true,
+    //     level: child.level + 1
+    //   });
+    //   let visible = i < this.getMaxVisibleChilds();
+    //   let childIndex = parseInt(index[index.length-1],10) + ( val == 'down' ? 1 : 0);
+    //   child.appendChild(childNode,visible,childIndex);
+    // }
   }
 }
 
