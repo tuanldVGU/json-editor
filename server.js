@@ -33,6 +33,7 @@ app.get("/", function(req, res,next) {
 app.options("/api/checkDM", cors(corsOptions));
 
 app.put("/api/checkDM",cors(corsOptions), function(req,res,next){
+
   const json_string = req.body.data;
   let dm_vaidate = require("./src/assets/js/customValidate");
   try {

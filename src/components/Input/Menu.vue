@@ -155,6 +155,22 @@ export default {
 				this.saveFile(data,'.sql');
 			} else alert('Please fix all the error.');
 		},
+		exportJSON: function(){
+			let is_error = document.getElementById('input_error');
+  		if (is_error.style.display == "none"){
+				let jsonString =JSON.stringify(this.json_data,undefined,4);
+				let file_name = this.fileName;
+				this.saveFile(jsonString,file_name);
+			} else alert('Please fix all the error.');
+		},
+		exportSQL: function (){
+			let is_error = document.getElementById('input_error');
+  		if (is_error.style.display == "none"){
+				let file_name = this.fileName.split('.')[0] + '.sql';
+				let data = exporter.toSQL(this.json_data);
+				this.saveFile(data,file_name);
+			} else alert('Please fix all the error.');
+		},
 		openConfig: function(){
 			util.openModal('config-modal');
 		},
