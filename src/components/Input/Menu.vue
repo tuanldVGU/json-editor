@@ -72,7 +72,7 @@
 						<a class="button is-secondary" @click="empty()">Continue without save</a>
 					</div>
 					<div class="control">
-						<a class="button is-primary" @click="exportJSON()">Save</a>
+						<a class="button is-primary" @click="closeModal('newfileModal'); exportJSON();">Save</a>
 					</div>
 				</div>
 			</div>
@@ -153,22 +153,6 @@ export default {
   		if (is_error.style.display == "none"){
 				let data = exporter.toSQL(this.json_data);
 				this.saveFile(data,'.sql');
-			} else alert('Please fix all the error.');
-		},
-		exportJSON: function(){
-			let is_error = document.getElementById('input_error');
-  		if (is_error.style.display == "none"){
-				let jsonString =JSON.stringify(this.json_data,undefined,4);
-				let file_name = this.fileName;
-				this.saveFile(jsonString,file_name);
-			} else alert('Please fix all the error.');
-		},
-		exportSQL: function (){
-			let is_error = document.getElementById('input_error');
-  		if (is_error.style.display == "none"){
-				let file_name = this.fileName.split('.')[0] + '.sql';
-				let data = exporter.toSQL(this.json_data);
-				this.saveFile(data,file_name);
 			} else alert('Please fix all the error.');
 		},
 		openConfig: function(){
