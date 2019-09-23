@@ -10,19 +10,41 @@
                 <span class="icon"><i class="far fa-caret-square-down"></i></span>
               </button>
               <div class="dropdown-content">
-                <div class="dropdown-item" v-if="!isRoot()">
+                <!-- <div class="dropdown-item" v-if="!isRoot()">
                   New node
                   <a title="up" @click="onChangeValue('new','up')"><span class="icon"><i class="fas fa-chevron-circle-up"></i></span></a> 
                   <a title="down" @click="onChangeValue('new','down')"><span class="icon"><i class="fas fa-chevron-circle-down"></i></span></a>
-                </div>
-                <div class="dropdown-item" v-if="(this.type != 'auto')">
-                  New child
-                  <a title="Boolean" @click="onChangeValue('new','child-bool')"><span class="icon"><i class="fas fa-check-square"></i></span></a>
-                  <a title="String" @click="onChangeValue('new','child-str')"><span class="icon"><i class="fas fa-keyboard"></i></span></a>
+                </div> -->
+                <template v-if="isRoot()">
+                  <div class="dropdown-item">
+                    <a @click="onChangeValue('new','class')">Add class</a>
+                  </div>
+                  <div class="dropdown-item">
+                    <a @click="onChangeValue('new','association')">Add association</a>
+                  </div>
+                </template>
+                <template v-if="(parentField() == 'class')">
+                  <div class="dropdown-item">
+                    <a @click="onChangeValue('new','super')">Add super</a>
+                  </div>
+                  <div class="dropdown-item">
+                    <a @click="onChangeValue('new','attributes')">Add attributes</a>
+                  </div>
+                </template>
+                <template v-if="(parentField() == 'association')">
+                  <div class="dropdown-item">
+                    <a @click="onChangeValue('new','ends')">Add ends</a>
+                  </div>
+                  <div class="dropdown-item">
+                    <a @click="onChangeValue('new','classes')">Add classes</a>
+                  </div>
+                </template>
+                <div class="dropdown-item"  v-if="(parentField() == 'attributes' || node_field == 'attributes')">
+                  <a @click="onChangeValue('new','type_name')">Add type name</a>
                 </div>
                 <div class="dropdown-item" v-if="!isRoot()">
                   <a @click="onChangeValue('delete','this')">Remove this node</a>
-                </div>
+                </div> 
               </div>
             </div>
           </div>
@@ -142,6 +164,26 @@ export default {
   methods: {
     isRoot: function(){
       return (this.type === 'root');
+    },
+    parentField: function(){
+      switch (this.node_field){
+        case "Class":
+        case "class":
+        case "super":
+        case "attributes":
+          return "class";
+          break;
+        case "Association":
+        case "association":
+        case "ends":
+        case "classes":
+          return "association";
+          break;
+        case "type":
+        case "name":
+          return "attributes";
+          break;
+      }
     },
     updateExpand: function(option){
       if (option == null) this.isExpanded = !this.isExpanded;
